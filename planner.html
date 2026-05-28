@@ -173,8 +173,8 @@ details.acc-panel .acc-body { padding:1.25rem 1.5rem 1.5rem; }
   </div>
   <div class="header-btns">
     <button class="hbtn" onclick="saveData()" title="Data auto-saves in your browser">Saved ✓</button>
-    <button class="hbtn" onclick="exportData()" title="Download your data as a backup file you can import on any device">⬇ Export Data</button>
-    <button class="hbtn" onclick="document.getElementById('importFile').click()" title="Restore data from a previously exported backup">⬆ Import Data</button>
+    <button class="hbtn" onclick="exportData()" title="Download your data as a backup">⬇ Export Data</button>
+    <button class="hbtn" onclick="document.getElementById('importFile').click()" title="Restore from backup">⬆ Import Data</button>
     <input type="file" id="importFile" accept=".json" style="display:none;" onchange="importData(this)">
     <button class="hbtn" onclick="downloadPDF()" style="background:#2c5f2e;color:#fff;">⬇ PDF</button>
     <button class="hbtn danger" onclick="resetData()">Reset</button>
@@ -183,14 +183,13 @@ details.acc-panel .acc-body { padding:1.25rem 1.5rem 1.5rem; }
 
 <div class="container">
 
-<!-- First-time visitor notice — hidden by JS once data is found -->
 <div id="freshStartBanner" class="banner warn" style="display:none;margin-bottom:1rem;">
-  👋 <strong>Welcome!</strong> You're seeing <em>sample data</em> — replace it with your own numbers in the Profile section above.
-  If you had data on another device, use <strong>Import Data</strong> in the top-right to restore it.
+  👋 <strong>Welcome!</strong> You're seeing <em>sample data</em>. Update the Profile section with your real numbers.
+  If you had data before, click <strong>⬆ Import Data</strong> above to restore it.
 </div>
 
 <details class="acc-panel" id="panel-profile" open>
-  <summary>
+    <summary>
     <span>🏠 Profile &amp; Portfolio</span>
     <span class="acc-arrow">▼</span>
   </summary>
@@ -369,7 +368,7 @@ details.acc-panel .acc-body { padding:1.25rem 1.5rem 1.5rem; }
 </details><!-- /panel-profile -->
 
 <details class="acc-panel" id="panel-goals" open>
-  <summary>
+    <summary>
     <span>🎯 Goals &amp; Corpus</span>
     <span class="acc-arrow">▼</span>
   </summary>
@@ -428,7 +427,7 @@ details.acc-panel .acc-body { padding:1.25rem 1.5rem 1.5rem; }
 </details><!-- /panel-goals -->
 
 <details class="acc-panel" id="panel-sip">
-  <summary>
+    <summary>
     <span>📊 SIP Planner</span>
     <span class="acc-arrow">▼</span>
   </summary>
@@ -475,7 +474,7 @@ details.acc-panel .acc-body { padding:1.25rem 1.5rem 1.5rem; }
 </details><!-- /panel-sip -->
 
 <details class="acc-panel" id="panel-retirement">
-  <summary>
+    <summary>
     <span>🪣 Withdrawal Strategy</span>
     <span class="acc-arrow">▼</span>
   </summary>
@@ -551,7 +550,7 @@ details.acc-panel .acc-body { padding:1.25rem 1.5rem 1.5rem; }
 </details><!-- /panel-retirement -->
 
 <details class="acc-panel" id="panel-networth">
-  <summary>
+    <summary>
     <span>💰 Net Worth</span>
     <span class="acc-arrow">▼</span>
   </summary>
@@ -665,7 +664,7 @@ details.acc-panel .acc-body { padding:1.25rem 1.5rem 1.5rem; }
 </details><!-- /panel-networth -->
 
 <details class="acc-panel" id="panel-projections">
-  <summary>
+    <summary>
     <span>📈 Projections &amp; Insights</span>
     <span class="acc-arrow">▼</span>
   </summary>
@@ -733,35 +732,30 @@ details.acc-panel .acc-body { padding:1.25rem 1.5rem 1.5rem; }
      JAVASCRIPT
 ═══════════════════════════════════════════ -->
 <script data-cfasync="false">
-/* ─── Accordion — uses native <details> toggle event, no onclick JS needed ─── */
-/* togglePanel kept as no-op for any legacy references that might remain      */
+/* ─── Accordion — native <details> handles open/close; toggle event for recalc ─── */
+// Legacy no-op kept in case any old onclick refs remain
 window.togglePanel = function(id) {};
 
 document.addEventListener('DOMContentLoaded', function() {
-  var panels = ['profile','goals','sip','retirement','networth','projections'];
-  panels.forEach(function(id) {
+  ['profile','goals','sip','retirement','networth','projections'].forEach(function(id) {
     var el = document.getElementById('panel-' + id);
     if (!el) return;
     el.addEventListener('toggle', function() {
       var opening = el.open;
-      // Trigger recalculation when certain panels are opened
       if (opening && ['goals','sip','projections','retirement','networth'].includes(id)) {
-        setTimeout(function(){
-          try { update(); } catch(e) {}
-          if (id === 'sip') { try { renderAllocSection(); } catch(e) {} }
-        }, 80);
+        setTimeout(function(){ try{update();}catch(e){} if(id==='sip'){try{renderAllocSection();}catch(e){}} }, 80);
       }
-      // Persist open state
       try {
         var saved = JSON.parse(localStorage.getItem('finplan_openPanels') || '["profile","goals"]');
-        saved = opening
-          ? saved.concat([id]).filter(function(v,i,a){ return a.indexOf(v)===i; })
-          : saved.filter(function(x){ return x !== id; });
+        saved = opening ? saved.concat([id]).filter(function(v,i,a){return a.indexOf(v)===i;}) : saved.filter(function(x){return x!==id;});
         localStorage.setItem('finplan_openPanels', JSON.stringify(saved));
       } catch(e) {}
     });
   });
 });
+
+// DEAD CODE BELOW — kept only if something references it, actual open/close done by browser
+
 
 /* ─── Helpers ─── */
 const fmtCr = n => {
@@ -1995,7 +1989,8 @@ function update() {
   const inp = getInputs();
   if (inp.retirementAge <= inp.currentAge) { inp.retirementAge = inp.currentAge+1; document.getElementById('retirementAge').value=inp.retirementAge; }
   if (inp.lifeExpectancy <= inp.retirementAge) { inp.lifeExpectancy = inp.retirementAge+10; document.getElementById('lifeExpectancy').value=inp.lifeExpectancy; }
-  if (inp.monthlyExpense <= 0) return;
+  try { renderGoals(); } catch(e) {}
+  if (inp.monthlyExpense <= 0) { try{saveData();}catch(e){} return; }
 
   const res = calculate(inp);
 
@@ -2070,19 +2065,12 @@ function saveData() {
       portB3Rate:       document.getElementById('portB3Rate').value,
     }
   };
-  try { localStorage.setItem('finplan_v2', JSON.stringify(d)); } catch(e){}
-}
-
-function showFreshBanner() {
-  var el = document.getElementById('freshStartBanner');
-  if (el) el.style.display = '';
+  try { localStorage.setItem('finplan_v3', JSON.stringify(d)); } catch(e){}
 }
 
 function loadData() {
-  let d; try { d = JSON.parse(localStorage.getItem('finplan_v2')); } catch(e){ return false; }
-  if (!d) { showFreshBanner(); return false; }
-  // Only restore arrays when they have entries — avoids wiping defaults if user visits
-  // from a fresh domain (new deploy) or if data was accidentally saved empty
+  let d; try { d = JSON.parse(localStorage.getItem('finplan_v3')); } catch(e){ return false; }
+  if (!d) { var b=document.getElementById("freshStartBanner"); if(b) b.style.display=""; return false; }
   if (d.expRows  && d.expRows.length  > 0) expRows  = d.expRows;
   if (d.goals    && d.goals.length    > 0) goals    = d.goals;
   if (d.reAssets && d.reAssets.length > 0) reAssets = d.reAssets;
@@ -2096,10 +2084,10 @@ function loadData() {
 
 function exportData() {
   try {
-    const raw = localStorage.getItem('finplan_v2');
-    if (!raw) { alert('No saved data yet — interact with the planner first, then export.'); return; }
-    const blob = new Blob([raw], { type: 'application/json' });
-    const a = document.createElement('a');
+    var raw = localStorage.getItem('finplan_v3');
+    if (!raw) { alert('No saved data yet — use the planner first, then export.'); return; }
+    var blob = new Blob([raw], { type: 'application/json' });
+    var a = document.createElement('a');
     a.href = URL.createObjectURL(blob);
     a.download = 'finscience-backup-' + new Date().toISOString().slice(0,10) + '.json';
     a.click();
@@ -2108,25 +2096,23 @@ function exportData() {
 }
 
 function importData(input) {
-  const file = input.files[0];
-  if (!file) return;
-  const reader = new FileReader();
+  var file = input.files[0]; if (!file) return;
+  var reader = new FileReader();
   reader.onload = function(e) {
     try {
-      const parsed = JSON.parse(e.target.result);
+      var parsed = JSON.parse(e.target.result);
       if (!parsed || typeof parsed !== 'object') throw new Error('Invalid file');
-      localStorage.setItem('finplan_v2', JSON.stringify(parsed));
-      alert('Data imported successfully! Reloading…');
-      location.reload();
-    } catch(err) { alert('Import failed — make sure you selected a valid finscience backup file.\n' + err.message); }
+      localStorage.setItem('finplan_v3', JSON.stringify(parsed));
+      alert('Data imported! Reloading…'); location.reload();
+    } catch(err) { alert('Import failed: ' + err.message); }
   };
   reader.readAsText(file);
-  input.value = ''; // reset so same file can be re-imported if needed
+  input.value = '';
 }
 
 function resetData() {
   if (!confirm('This will clear all your saved data and reset to defaults. Use this before sharing the file with someone else. Continue?')) return;
-  try { localStorage.removeItem('finplan_v2'); } catch(e){}
+  try { localStorage.removeItem('finplan_v3'); } catch(e){}
   location.reload();
 }
 
@@ -2785,4 +2771,95 @@ function buildRetirementProjection(monthlySIP, stepUp, ca, ra, b1Fr, b2Fr, b3Fr,
 
 function buildBucketGrowthChart(ca, ra, b1Target, b2Target, b3Target, b1Frac, b2Frac, b3Frac, monthlySIP, stepUp, r1, r2, r3) {
   const n1 = Math.max(1, ra - ca);
-  const labe
+  const labels = [];
+  const b1Data = [], b2Data = [], b3Data = [];
+
+  let sip = monthlySIP;
+  let cumB1 = 0, cumB2 = 0, cumB3 = 0;
+
+  for (let y = 0; y < n1; y++) {
+    const age = ca + y;
+    const s1 = sip * b1Frac;
+    const s2 = sip * b2Frac;
+    const s3 = sip * (1 - b1Frac - b2Frac);
+    const yrsLeft = n1 - y;
+
+    cumB1 += (s1 * 12) * Math.pow(1 + (r1||0.07), yrsLeft);
+    cumB2 += (s2 * 12) * Math.pow(1 + (r2||0.09), yrsLeft);
+    cumB3 += (s3 * 12) * Math.pow(1 + (r3||0.12), yrsLeft);
+
+    labels.push('Age ' + age);
+    b1Data.push(Math.round(cumB1));
+    b2Data.push(Math.round(cumB2));
+    b3Data.push(Math.round(cumB3));
+    sip *= (1 + stepUp);
+  }
+
+  const ctx = document.getElementById('bucketGrowthChart');
+  if (!ctx) return;
+
+  if (bucketChart) { bucketChart.destroy(); bucketChart = null; }
+
+  const fmt = v => {
+    if (v >= 10000000) return '₹' + (v/10000000).toFixed(1) + 'Cr';
+    if (v >= 100000)   return '₹' + (v/100000).toFixed(1) + 'L';
+    return '₹' + Math.round(v).toLocaleString('en-IN');
+  };
+
+  bucketChart = new Chart(ctx, {
+    type: 'bar',
+    data: {
+      labels,
+      datasets: [
+        { label: 'B1 — Liquid/Debt (7%)',  data: b1Data, backgroundColor: '#34a85388', borderColor: '#34a853', borderWidth: 1 },
+        { label: 'B2 — Hybrid (9%)',        data: b2Data, backgroundColor: '#f5a62388', borderColor: '#f5a623', borderWidth: 1 },
+        { label: 'B3 — Equity (12%)',       data: b3Data, backgroundColor: '#185fa588', borderColor: '#185fa5', borderWidth: 1 },
+      ]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: true,
+      plugins: {
+        legend: { position: 'top', labels: { font: { size: 11 } } },
+        tooltip: {
+          callbacks: {
+            label: ctx => ' ' + ctx.dataset.label + ': ' + fmt(ctx.raw),
+            footer: items => {
+              const total = items.reduce((s, i) => s + i.raw, 0);
+              return 'Total: ' + fmt(total);
+            }
+          }
+        }
+      },
+      scales: {
+        x: { stacked: true, ticks: { font: { size: 9 } } },
+        y: {
+          stacked: true,
+          ticks: {
+            callback: v => fmt(v),
+            font: { size: 9 }
+          }
+        }
+      }
+    }
+  });
+}
+
+// ── Restore open panels — set details.open from localStorage ─────────────────
+(function() {
+  var open = ['profile','goals'];
+  try { open = JSON.parse(localStorage.getItem('finplan_openPanels') || '["profile","goals"]'); } catch(e) {}
+  ['profile','goals','sip','retirement','networth','projections'].forEach(function(id) {
+    var el = document.getElementById('panel-' + id);
+    if (el) el.open = open.indexOf(id) !== -1;
+  });
+})();
+
+function downloadPDF() { window.print(); }
+
+// ── Final render ─────────────────────────────────────────────────────────────
+try { renderAllocSection(); } catch(e) { console.error('renderAllocSection:', e); }
+try { update(); } catch(e) { console.error('update:', e); }
+</script>
+</body>
+</html>
