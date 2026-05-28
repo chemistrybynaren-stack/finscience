@@ -1,0 +1,784 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Finscience.org — Smart Retirement & Investment Planner for Indians</title>
+  <meta name="description" content="Plan your retirement, SIPs, and financial goals with India's smartest personal finance tool. Built for Indian salaried professionals. Just ₹1 a day."/>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet"/>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --purple:     #7c3aed;
+      --purple-dark:#5b21b6;
+      --purple-light:#ede9fe;
+      --gold:       #f59e0b;
+      --gold-dark:  #b45309;
+      --gold-light: #fef3c7;
+      --dark:       #1e1b4b;
+      --text:       #1f2937;
+      --muted:      #6b7280;
+      --bg:         #faf5ff;
+      --white:      #ffffff;
+      --card-shadow:0 4px 24px rgba(124,58,237,0.10);
+    }
+    html { scroll-behavior: smooth; }
+    body {
+      font-family: 'Inter', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.6;
+    }
+
+    /* ── NAV ── */
+    nav {
+      position: sticky; top: 0; z-index: 100;
+      background: rgba(30,27,75,0.97);
+      backdrop-filter: blur(10px);
+      padding: 0 5%;
+      display: flex; align-items: center; justify-content: space-between;
+      height: 64px;
+      border-bottom: 1px solid rgba(245,158,11,0.2);
+    }
+    .nav-logo {
+      font-size: 22px; font-weight: 900; letter-spacing: -0.5px;
+      color: var(--white);
+    }
+    .nav-logo span { color: var(--gold); }
+    .nav-links { display: flex; gap: 28px; list-style: none; }
+    .nav-links a {
+      color: rgba(255,255,255,0.8); text-decoration: none;
+      font-size: 14px; font-weight: 500; transition: color 0.2s;
+    }
+    .nav-links a:hover { color: var(--gold); }
+    .nav-cta {
+      background: var(--gold); color: var(--dark);
+      padding: 9px 22px; border-radius: 8px;
+      font-weight: 700; font-size: 14px; text-decoration: none;
+      transition: background 0.2s, transform 0.1s;
+    }
+    .nav-cta:hover { background: #fbbf24; transform: translateY(-1px); }
+
+    /* ── HERO ── */
+    .hero {
+      background: linear-gradient(135deg, #1e1b4b 0%, #3b0764 50%, #1e1b4b 100%);
+      padding: 100px 5% 90px;
+      text-align: center;
+      position: relative; overflow: hidden;
+    }
+    .hero::before {
+      content: '';
+      position: absolute; inset: 0;
+      background: radial-gradient(ellipse at 60% 30%, rgba(245,158,11,0.12) 0%, transparent 60%),
+                  radial-gradient(ellipse at 20% 80%, rgba(124,58,237,0.2) 0%, transparent 50%);
+    }
+    .hero-badge {
+      display: inline-block;
+      background: rgba(245,158,11,0.15);
+      border: 1px solid rgba(245,158,11,0.4);
+      color: var(--gold);
+      padding: 6px 18px; border-radius: 50px;
+      font-size: 13px; font-weight: 600; margin-bottom: 24px;
+      position: relative;
+    }
+    .hero h1 {
+      font-size: clamp(32px, 5vw, 58px);
+      font-weight: 900; color: var(--white);
+      line-height: 1.15; margin-bottom: 12px;
+      position: relative;
+    }
+    .hero h1 span { color: var(--gold); }
+    .hero-marathi {
+      font-size: 16px; color: rgba(255,255,255,0.6);
+      margin-bottom: 20px; position: relative;
+      font-style: italic;
+    }
+    .hero-sub {
+      font-size: clamp(16px, 2.5vw, 20px);
+      color: rgba(255,255,255,0.8);
+      max-width: 620px; margin: 0 auto 36px;
+      position: relative;
+    }
+    .hero-price-pill {
+      display: inline-flex; align-items: center; gap: 14px;
+      background: rgba(255,255,255,0.07);
+      border: 1px solid rgba(255,255,255,0.15);
+      padding: 14px 30px; border-radius: 16px;
+      margin-bottom: 36px; position: relative;
+    }
+    .hero-price-pill .big-price {
+      font-size: 42px; font-weight: 900; color: var(--gold);
+      line-height: 1;
+    }
+    .hero-price-pill .price-desc {
+      text-align: left;
+    }
+    .hero-price-pill .price-desc .per {
+      font-size: 13px; color: rgba(255,255,255,0.6);
+    }
+    .hero-price-pill .price-desc .day {
+      font-size: 18px; font-weight: 700; color: var(--white);
+    }
+    .hero-price-pill .price-desc .year {
+      font-size: 12px; color: rgba(255,255,255,0.5);
+    }
+    .divider-pill { width: 1px; height: 40px; background: rgba(255,255,255,0.2); }
+    .hero-btns {
+      display: flex; gap: 14px; justify-content: center; flex-wrap: wrap;
+      position: relative;
+    }
+    .btn-primary {
+      background: linear-gradient(135deg, var(--gold), #fbbf24);
+      color: var(--dark); padding: 15px 36px; border-radius: 10px;
+      font-weight: 800; font-size: 16px; text-decoration: none;
+      transition: transform 0.15s, box-shadow 0.15s;
+      box-shadow: 0 4px 20px rgba(245,158,11,0.4);
+    }
+    .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 8px 28px rgba(245,158,11,0.5); }
+    .btn-secondary {
+      background: rgba(255,255,255,0.1);
+      color: var(--white); padding: 15px 30px; border-radius: 10px;
+      font-weight: 600; font-size: 16px; text-decoration: none;
+      border: 1px solid rgba(255,255,255,0.25);
+      transition: background 0.2s;
+    }
+    .btn-secondary:hover { background: rgba(255,255,255,0.18); }
+    .hero-trust {
+      margin-top: 32px; position: relative;
+      font-size: 13px; color: rgba(255,255,255,0.5);
+    }
+    .hero-trust span { color: var(--gold); }
+
+    /* ── STATS BAR ── */
+    .stats-bar {
+      background: var(--white);
+      border-bottom: 1px solid #e5e7eb;
+      padding: 24px 5%;
+      display: flex; justify-content: center; flex-wrap: wrap; gap: 40px;
+    }
+    .stat-item { text-align: center; }
+    .stat-item .num {
+      font-size: 26px; font-weight: 900; color: var(--purple);
+    }
+    .stat-item .lbl {
+      font-size: 12px; color: var(--muted); font-weight: 500;
+    }
+
+    /* ── SECTION COMMONS ── */
+    section { padding: 80px 5%; }
+    .section-tag {
+      display: inline-block;
+      background: var(--purple-light); color: var(--purple);
+      padding: 5px 14px; border-radius: 50px;
+      font-size: 12px; font-weight: 700; letter-spacing: 0.5px;
+      margin-bottom: 14px; text-transform: uppercase;
+    }
+    .section-tag.gold { background: var(--gold-light); color: var(--gold-dark); }
+    h2 {
+      font-size: clamp(24px, 4vw, 38px);
+      font-weight: 900; color: var(--dark);
+      margin-bottom: 12px; line-height: 1.2;
+    }
+    h2 span { color: var(--purple); }
+    .section-sub {
+      font-size: 17px; color: var(--muted);
+      max-width: 580px; margin: 0 auto 56px;
+    }
+    .center { text-align: center; }
+
+    /* ── PROBLEM SECTION ── */
+    .problem-section { background: var(--white); }
+    .problem-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 20px; max-width: 960px; margin: 0 auto;
+    }
+    .problem-card {
+      background: #fff5f5;
+      border: 1px solid #fecaca;
+      border-radius: 14px; padding: 24px;
+    }
+    .problem-card .icon { font-size: 28px; margin-bottom: 12px; }
+    .problem-card h3 { font-size: 15px; font-weight: 700; color: #991b1b; margin-bottom: 6px; }
+    .problem-card p { font-size: 13px; color: #6b7280; }
+
+    /* ── FEATURES ── */
+    .features-section { background: var(--bg); }
+    .features-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 24px; max-width: 1100px; margin: 0 auto;
+    }
+    .feature-card {
+      background: var(--white);
+      border-radius: 16px; padding: 28px;
+      box-shadow: var(--card-shadow);
+      transition: transform 0.2s, box-shadow 0.2s;
+      border: 1px solid rgba(124,58,237,0.08);
+    }
+    .feature-card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 12px 40px rgba(124,58,237,0.15);
+    }
+    .feature-icon {
+      width: 52px; height: 52px; border-radius: 14px;
+      background: var(--purple-light);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 24px; margin-bottom: 18px;
+    }
+    .feature-card h3 { font-size: 16px; font-weight: 700; color: var(--dark); margin-bottom: 8px; }
+    .feature-card p { font-size: 14px; color: var(--muted); line-height: 1.6; }
+    .feature-card .badge {
+      display: inline-block; margin-top: 12px;
+      background: var(--purple-light); color: var(--purple);
+      font-size: 11px; font-weight: 700; padding: 3px 10px; border-radius: 50px;
+    }
+
+    /* ── HOW IT WORKS ── */
+    .how-section { background: var(--dark); }
+    .how-section h2 { color: var(--white); }
+    .how-section .section-sub { color: rgba(255,255,255,0.6); }
+    .steps {
+      display: flex; gap: 0; max-width: 900px; margin: 0 auto;
+      position: relative; flex-wrap: wrap; justify-content: center;
+    }
+    .step {
+      flex: 1; min-width: 200px; text-align: center; padding: 20px;
+      position: relative;
+    }
+    .step::after {
+      content: '→';
+      position: absolute; right: -12px; top: 36px;
+      font-size: 24px; color: var(--gold); opacity: 0.5;
+    }
+    .step:last-child::after { display: none; }
+    .step-num {
+      width: 60px; height: 60px; border-radius: 50%;
+      background: linear-gradient(135deg, var(--purple), var(--gold));
+      display: flex; align-items: center; justify-content: center;
+      font-size: 22px; font-weight: 900; color: var(--white);
+      margin: 0 auto 16px;
+    }
+    .step h3 { font-size: 15px; font-weight: 700; color: var(--white); margin-bottom: 8px; }
+    .step p { font-size: 13px; color: rgba(255,255,255,0.6); }
+
+    /* ── PRICING ── */
+    .pricing-section { background: var(--white); }
+    .pricing-card-wrap {
+      display: flex; justify-content: center; gap: 24px; flex-wrap: wrap;
+    }
+    .pricing-card {
+      background: var(--bg);
+      border: 2px solid #e5e7eb;
+      border-radius: 20px; padding: 36px 32px;
+      width: 300px; text-align: center;
+      transition: transform 0.2s;
+    }
+    .pricing-card.featured {
+      background: linear-gradient(160deg, #1e1b4b, #3b0764);
+      border-color: var(--gold);
+      transform: scale(1.04);
+      box-shadow: 0 12px 48px rgba(124,58,237,0.3);
+    }
+    .pricing-card.featured h3 { color: var(--gold); }
+    .pricing-card.featured .plan-price { color: var(--white); }
+    .pricing-card.featured .plan-per { color: rgba(255,255,255,0.6); }
+    .pricing-card.featured li { color: rgba(255,255,255,0.85); }
+    .pricing-card.featured li::before { color: var(--gold); }
+    .best-value {
+      background: var(--gold); color: var(--dark);
+      font-size: 11px; font-weight: 800; padding: 4px 14px; border-radius: 50px;
+      display: inline-block; margin-bottom: 16px;
+    }
+    .pricing-card h3 { font-size: 18px; font-weight: 800; color: var(--dark); margin-bottom: 20px; }
+    .plan-price { font-size: 52px; font-weight: 900; color: var(--purple); line-height: 1; }
+    .plan-per { font-size: 14px; color: var(--muted); margin-bottom: 24px; }
+    .plan-day {
+      font-size: 13px; font-weight: 700; color: var(--gold);
+      background: var(--gold-light); padding: 5px 14px; border-radius: 50px;
+      display: inline-block; margin-bottom: 24px;
+    }
+    .pricing-card ul {
+      list-style: none; text-align: left; margin-bottom: 28px;
+    }
+    .pricing-card li {
+      font-size: 14px; color: var(--text); padding: 6px 0;
+      border-bottom: 1px solid rgba(0,0,0,0.06);
+    }
+    .pricing-card li::before { content: '✓  '; color: var(--purple); font-weight: 700; }
+    .pricing-card .btn-plan {
+      display: block; width: 100%;
+      padding: 14px; border-radius: 10px;
+      font-weight: 700; font-size: 15px; text-decoration: none;
+      transition: transform 0.15s;
+    }
+    .pricing-card .btn-plan:hover { transform: translateY(-1px); }
+    .btn-plan-free { background: #f3f4f6; color: var(--dark); }
+    .btn-plan-paid { background: linear-gradient(135deg, var(--gold), #fbbf24); color: var(--dark); }
+
+    /* ── TESTIMONIALS ── */
+    .testimonials-section { background: var(--bg); }
+    .testi-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 20px; max-width: 1000px; margin: 0 auto;
+    }
+    .testi-card {
+      background: var(--white); border-radius: 16px; padding: 24px;
+      box-shadow: var(--card-shadow);
+      border-left: 4px solid var(--purple);
+    }
+    .testi-stars { color: var(--gold); font-size: 16px; margin-bottom: 12px; }
+    .testi-text { font-size: 14px; color: var(--text); line-height: 1.7; margin-bottom: 16px; font-style: italic; }
+    .testi-author { display: flex; align-items: center; gap: 12px; }
+    .testi-avatar {
+      width: 40px; height: 40px; border-radius: 50%;
+      background: var(--purple-light);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 18px;
+    }
+    .testi-name { font-size: 14px; font-weight: 700; color: var(--dark); }
+    .testi-role { font-size: 12px; color: var(--muted); }
+
+    /* ── FAQ ── */
+    .faq-section { background: var(--white); }
+    .faq-list { max-width: 720px; margin: 0 auto; }
+    .faq-item {
+      border-bottom: 1px solid #e5e7eb; padding: 20px 0; cursor: pointer;
+    }
+    .faq-q {
+      display: flex; justify-content: space-between; align-items: center;
+      font-size: 15px; font-weight: 600; color: var(--dark);
+      gap: 16px;
+    }
+    .faq-q .toggle {
+      width: 28px; height: 28px; border-radius: 50%;
+      background: var(--purple-light); color: var(--purple);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 18px; font-weight: 700; flex-shrink: 0;
+      transition: transform 0.2s;
+    }
+    .faq-a {
+      font-size: 14px; color: var(--muted); line-height: 1.7;
+      max-height: 0; overflow: hidden; transition: max-height 0.3s ease, padding 0.3s;
+    }
+    .faq-item.open .faq-a { max-height: 200px; padding-top: 12px; }
+    .faq-item.open .toggle { transform: rotate(45deg); }
+
+    /* ── CTA BANNER ── */
+    .cta-section {
+      background: linear-gradient(135deg, #1e1b4b, #3b0764);
+      text-align: center; padding: 80px 5%;
+    }
+    .cta-section h2 { color: var(--white); margin-bottom: 12px; }
+    .cta-section h2 span { color: var(--gold); }
+    .cta-section p { color: rgba(255,255,255,0.7); font-size: 17px; margin-bottom: 36px; }
+    .cta-section .btn-primary { font-size: 18px; padding: 18px 48px; }
+    .cta-guarantee {
+      margin-top: 20px; font-size: 13px; color: rgba(255,255,255,0.5);
+    }
+    .cta-guarantee span { color: var(--gold); }
+
+    /* ── FOOTER ── */
+    footer {
+      background: var(--dark); padding: 40px 5%;
+      display: flex; justify-content: space-between; align-items: center;
+      flex-wrap: wrap; gap: 16px;
+    }
+    .footer-logo { font-size: 20px; font-weight: 900; color: var(--white); }
+    .footer-logo span { color: var(--gold); }
+    .footer-links { display: flex; gap: 20px; }
+    .footer-links a { font-size: 13px; color: rgba(255,255,255,0.5); text-decoration: none; }
+    .footer-links a:hover { color: var(--gold); }
+    .footer-copy { font-size: 12px; color: rgba(255,255,255,0.3); }
+
+    /* ── MOBILE ── */
+    @media (max-width: 640px) {
+      nav { padding: 0 4%; }
+      .nav-links { display: none; }
+      .hero { padding: 64px 5% 56px; }
+      .hero-price-pill { flex-direction: column; gap: 8px; }
+      .divider-pill { width: 60px; height: 1px; }
+      .steps { flex-direction: column; align-items: center; }
+      .step::after { content: '↓'; right: auto; top: auto; bottom: -16px; }
+      .pricing-card.featured { transform: scale(1); }
+      footer { flex-direction: column; text-align: center; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <div class="nav-logo">Fin<span>science</span>.org</div>
+  <ul class="nav-links">
+    <li><a href="#features">Features</a></li>
+    <li><a href="#how">How it works</a></li>
+    <li><a href="#pricing">Pricing</a></li>
+    <li><a href="#faq">FAQ</a></li>
+  </ul>
+  <a href="#pricing" class="nav-cta">Start for ₹1/day →</a>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-badge">🇮🇳 Made for Indians · Marathi Supported</div>
+  <h1>Your Entire Financial Future,<br/><span>Planned in Minutes</span></h1>
+  <div class="hero-marathi">आपले आर्थिक भविष्य — एका क्लिकमध्ये</div>
+  <p class="hero-sub">Retirement corpus, SIP calculator, 3-bucket strategy, safety net & more — all in one powerful tool.</p>
+
+  <div class="hero-price-pill">
+    <div>
+      <div class="big-price">₹365</div>
+    </div>
+    <div class="divider-pill"></div>
+    <div class="price-desc">
+      <div class="per">Only</div>
+      <div class="day">₹1 per day</div>
+      <div class="year">Billed yearly · Cancel anytime</div>
+    </div>
+  </div>
+
+  <div class="hero-btns">
+    <a href="#pricing" class="btn-primary">🚀 Start Planning Now</a>
+    <a href="planner.html" class="btn-secondary" target="_blank">👁 See Live Demo</a>
+  </div>
+  <div class="hero-trust">
+    <span>✓ No credit card needed for demo</span> &nbsp;·&nbsp;
+    <span>✓ Your data stays on your device</span> &nbsp;·&nbsp;
+    <span>✓ Works offline</span>
+  </div>
+</section>
+
+<!-- STATS -->
+<div class="stats-bar">
+  <div class="stat-item"><div class="num">3-Bucket</div><div class="lbl">Retirement Strategy</div></div>
+  <div class="stat-item"><div class="num">10+</div><div class="lbl">Calculators in One Tool</div></div>
+  <div class="stat-item"><div class="num">100%</div><div class="lbl">Private — No Data Upload</div></div>
+  <div class="stat-item"><div class="num">₹1/day</div><div class="lbl">Most Affordable Plan</div></div>
+</div>
+
+<!-- PROBLEM -->
+<section class="problem-section">
+  <div class="center">
+    <span class="section-tag">The Problem</span>
+    <h2>Why Most Indians <span>Never Retire Rich</span></h2>
+    <p class="section-sub">Most salaried Indians make the same 4 mistakes — and do not realise it until it is too late.</p>
+  </div>
+  <div class="problem-grid">
+    <div class="problem-card">
+      <div class="icon">😰</div>
+      <h3>No Retirement Plan</h3>
+      <p>They save money in FDs without knowing if it is enough for 25+ years of retirement.</p>
+    </div>
+    <div class="problem-card">
+      <div class="icon">📉</div>
+      <h3>Inflation is Ignored</h3>
+      <p>₹50,000/month today will need ₹1.7 lakh/month in 20 years. Most people do not account for this.</p>
+    </div>
+    <div class="problem-card">
+      <div class="icon">🏥</div>
+      <h3>No Emergency Buffer</h3>
+      <p>One hospital bill or job loss can wipe out years of savings without a proper safety net.</p>
+    </div>
+    <div class="problem-card">
+      <div class="icon">🤔</div>
+      <h3>SIP Without a Goal</h3>
+      <p>Investing randomly without knowing exactly how much you need — and when — is just guessing.</p>
+    </div>
+  </div>
+</section>
+
+<!-- FEATURES -->
+<section class="features-section" id="features">
+  <div class="center">
+    <span class="section-tag">Features</span>
+    <h2>Everything You Need,<br/><span>Nothing You Don't</span></h2>
+    <p class="section-sub">Finscience gives you a complete financial command centre — not just a simple calculator.</p>
+  </div>
+  <div class="features-grid">
+    <div class="feature-card" style="border:2px solid #f59e0b;">
+      <div class="feature-icon" style="background:#fef3c7;">🎯</div>
+      <h3>Retirement Corpus Calculator</h3>
+      <p>Enter your age, monthly expenses, and retirement age. Get the exact corpus you need — adjusted for inflation.</p>
+      <span class="badge" style="background:#fef3c7;color:#b45309;">✅ FREE — Always</span>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon">🪣</div>
+      <h3>3-Bucket Retirement Strategy</h3>
+      <p>Divide your corpus into Liquid (B1), Hybrid (B2), and Equity (B3) buckets. Never run out of money in retirement.</p>
+      <span class="badge">🔐 Subscribers Only</span>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon">📈</div>
+      <h3>SIP Goal Calculator</h3>
+      <p>Find out exactly how much to invest monthly (with step-up) to reach your retirement goal on time.</p>
+      <span class="badge">🔐 Subscribers Only</span>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon">🛡</div>
+      <h3>Safety Net Planner</h3>
+      <p>Calculate your emergency fund, health emergency buffer, and investable surplus — all separated clearly.</p>
+      <span class="badge">🔐 Subscribers Only</span>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon">🏅</div>
+      <h3>Goal-Based Investing</h3>
+      <p>Plan for children's education, home purchase, wedding, and more — alongside your retirement goal.</p>
+      <span class="badge">🔐 Subscribers Only</span>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon">📊</div>
+      <h3>Visual Charts & Insights</h3>
+      <p>See your corpus growth, bucket allocation, and SIP progress with beautiful, easy-to-read charts.</p>
+      <span class="badge">🔐 Subscribers Only</span>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon">🔒</div>
+      <h3>100% Private</h3>
+      <p>All your financial data stays on your device. Nothing is uploaded to any server. Your numbers are yours alone.</p>
+      <span class="badge" style="background:#fef3c7;color:#b45309;">✅ FREE — Always</span>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon">📄</div>
+      <h3>PDF Report Export</h3>
+      <p>Download a clean, professional financial plan report you can share with your family or financial advisor.</p>
+      <span class="badge">🔐 Subscribers Only</span>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon">🌐</div>
+      <h3>Marathi Language Support</h3>
+      <p>Switch the entire tool to Marathi — perfect for families in Maharashtra who are more comfortable in their mother tongue.</p>
+      <span class="badge">🔐 Coming Soon · Subscribers Only</span>
+    </div>
+  </div>
+</section>
+
+<!-- HOW IT WORKS -->
+<section class="how-section" id="how">
+  <div class="center">
+    <span class="section-tag" style="background:rgba(245,158,11,0.15);color:var(--gold);">How It Works</span>
+    <h2>3 Simple Steps to Your <span style="color:var(--gold);">Financial Clarity</span></h2>
+    <p class="section-sub">No finance degree needed. No jargon. Just honest numbers about your future.</p>
+  </div>
+  <div class="steps">
+    <div class="step">
+      <div class="step-num">1</div>
+      <h3>Enter Your Details</h3>
+      <p>Your age, monthly expenses, current savings, and retirement age. Takes 2 minutes.</p>
+    </div>
+    <div class="step">
+      <div class="step-num">2</div>
+      <h3>See Your Numbers</h3>
+      <p>The tool instantly shows your retirement corpus, monthly SIP needed, and safety net required.</p>
+    </div>
+    <div class="step">
+      <div class="step-num">3</div>
+      <h3>Act With Confidence</h3>
+      <p>Download your plan, adjust your investments, and check back every year. Your future is planned.</p>
+    </div>
+  </div>
+</section>
+
+<!-- PRICING -->
+<section class="pricing-section" id="pricing">
+  <div class="center">
+    <span class="section-tag gold">Pricing</span>
+    <h2>Simple, Honest <span>Pricing</span></h2>
+    <p class="section-sub">Less than a cup of tea per day. Cancel anytime.</p>
+  </div>
+  <div class="pricing-card-wrap">
+    <!-- Free -->
+    <div class="pricing-card">
+      <h3>🆓 Free Forever</h3>
+      <div class="plan-price">₹0</div>
+      <div class="plan-per">no credit card needed</div>
+      <ul>
+        <li>✅ Retirement corpus calculator</li>
+        <li style="color:#d1d5db;text-decoration:line-through;font-size:13px;">SIP goal calculator</li>
+        <li style="color:#d1d5db;text-decoration:line-through;font-size:13px;">3-Bucket strategy</li>
+        <li style="color:#d1d5db;text-decoration:line-through;font-size:13px;">Safety net planner</li>
+        <li style="color:#d1d5db;text-decoration:line-through;font-size:13px;">Goal-based investing</li>
+        <li style="color:#d1d5db;text-decoration:line-through;font-size:13px;">PDF report export</li>
+      </ul>
+      <a href="planner.html" class="btn-plan btn-plan-free" target="_blank">Try Free Demo</a>
+    </div>
+
+    <!-- Paid -->
+    <div class="pricing-card featured">
+      <div class="best-value">⭐ BEST VALUE</div>
+      <h3>Full Access</h3>
+      <div class="plan-price">₹365</div>
+      <div class="plan-per" style="color:rgba(255,255,255,0.55);">per year · billed annually</div>
+      <div class="plan-day">Just ₹1 per day!</div>
+      <ul style="border-color:rgba(255,255,255,0.1);">
+        <li>All calculators unlocked</li>
+        <li>3-Bucket retirement strategy</li>
+        <li>Goal-based investing</li>
+        <li>Safety net planner</li>
+        <li>PDF report export</li>
+        <li>Cloud data save (coming soon)</li>
+        <li>Marathi language (coming soon)</li>
+        <li>Priority email support</li>
+      </ul>
+      <a href="https://razorpay.com" class="btn-plan btn-plan-paid">Subscribe Now →</a>
+    </div>
+  </div>
+  <p style="text-align:center;margin-top:20px;font-size:13px;color:#7c3aed;font-weight:600;">
+    🎯 Free plan = Retirement Calculator only &nbsp;·&nbsp; Full plan = Everything unlocked
+  </p>
+  <p style="text-align:center;margin-top:10px;font-size:13px;color:var(--muted);">
+    🔒 Secure payment via Razorpay · UPI, Cards, Net Banking accepted · 7-day refund guarantee
+  </p>
+</section>
+
+<!-- TESTIMONIALS -->
+<section class="testimonials-section" id="testimonials">
+  <div class="center">
+    <span class="section-tag">Testimonials</span>
+    <h2>What Our <span>Users Say</span></h2>
+    <p class="section-sub">Real people, real financial clarity.</p>
+  </div>
+  <div class="testi-grid">
+    <div class="testi-card">
+      <div class="testi-stars">★★★★★</div>
+      <p class="testi-text">"I am a school teacher in Pune. I had no idea how much I needed to save for retirement. Finscience showed me in 5 minutes — and now I know exactly how much SIP to start."</p>
+      <div class="testi-author">
+        <div class="testi-avatar">👩‍🏫</div>
+        <div>
+          <div class="testi-name">Sunita Deshmukh</div>
+          <div class="testi-role">School Teacher, Pune</div>
+        </div>
+      </div>
+    </div>
+    <div class="testi-card">
+      <div class="testi-stars">★★★★★</div>
+      <p class="testi-text">"The 3-bucket strategy was something I had never heard of. Now I understand how to manage money in retirement without worrying about market crashes. Excellent tool."</p>
+      <div class="testi-author">
+        <div class="testi-avatar">👨‍💼</div>
+        <div>
+          <div class="testi-name">Rajesh Patil</div>
+          <div class="testi-role">Bank Manager, Nashik</div>
+        </div>
+      </div>
+    </div>
+    <div class="testi-card">
+      <div class="testi-stars">★★★★★</div>
+      <p class="testi-text">"My husband and I sat together and planned our entire financial future in one evening. The safety net section was an eye-opener. ₹365 is nothing for this peace of mind!"</p>
+      <div class="testi-author">
+        <div class="testi-avatar">👩</div>
+        <div>
+          <div class="testi-name">Priya Joshi</div>
+          <div class="testi-role">IT Professional, Mumbai</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FAQ -->
+<section class="faq-section" id="faq">
+  <div class="center">
+    <span class="section-tag">FAQ</span>
+    <h2>Common <span>Questions</span></h2>
+    <p class="section-sub">Everything you need to know before subscribing.</p>
+  </div>
+  <div class="faq-list">
+    <div class="faq-item">
+      <div class="faq-q">Is my financial data safe? <div class="toggle">+</div></div>
+      <div class="faq-a">Yes, 100%. All your data is stored only on your own device (browser local storage). Nothing is sent to any server. Not even we can see your numbers. Your financial privacy is completely protected.</div>
+    </div>
+    <div class="faq-item">
+      <div class="faq-q">Do I need any finance knowledge to use this? <div class="toggle">+</div></div>
+      <div class="faq-a">Not at all. The tool is designed for ordinary salaried professionals. You simply fill in your monthly expenses, age, and savings — the tool does all the calculations. Every number comes with a plain-language explanation.</div>
+    </div>
+    <div class="faq-item">
+      <div class="faq-q">What is the 3-bucket strategy? <div class="toggle">+</div></div>
+      <div class="faq-a">It is a retirement withdrawal strategy where you divide your retirement corpus into 3 parts: Bucket 1 (liquid, 1–3 years of expenses), Bucket 2 (hybrid, 4–10 years), and Bucket 3 (equity, 10+ years). This ensures you always have safe money available while your long-term money keeps growing.</div>
+    </div>
+    <div class="faq-item">
+      <div class="faq-q">Can I cancel my subscription? <div class="toggle">+</div></div>
+      <div class="faq-a">Yes, you can cancel anytime. If you cancel within 7 days of payment, we will refund the full amount — no questions asked.</div>
+    </div>
+    <div class="faq-item">
+      <div class="faq-q">When will Marathi language support be added? <div class="toggle">+</div></div>
+      <div class="faq-a">Marathi language support is currently under development and will be available to all subscribers at no extra cost. We expect to launch it within the next 2–3 months.</div>
+    </div>
+    <div class="faq-item">
+      <div class="faq-q">What payment methods are accepted? <div class="toggle">+</div></div>
+      <div class="faq-a">We accept all major payment methods via Razorpay — UPI (Google Pay, PhonePe, Paytm), credit/debit cards (Visa, Mastercard, RuPay), and net banking for all major Indian banks.</div>
+    </div>
+  </div>
+</section>
+
+<!-- CTA BANNER -->
+<section class="cta-section">
+  <h2>Start Planning Your Future <span>Today</span></h2>
+  <p>For just ₹1 a day — less than a chai — know exactly where you stand financially.<br/>Thousands of Indians are already planning smarter.</p>
+  <a href="#pricing" class="btn-primary">🚀 Get Full Access for ₹365/year</a>
+  <div class="cta-guarantee">
+    <span>✓ 7-day money-back guarantee</span> &nbsp;·&nbsp;
+    <span>✓ No auto-renewal without consent</span> &nbsp;·&nbsp;
+    <span>✓ Cancel anytime</span>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-logo">Fin<span>science</span>.org</div>
+  <div class="footer-links">
+    <a href="#">Privacy Policy</a>
+    <a href="#">Terms of Use</a>
+    <a href="#">Contact</a>
+    <a href="planner.html" target="_blank">Open Planner</a>
+  </div>
+  <div class="footer-copy">© 2026 Finscience.org · Built with ❤️ for India</div>
+</footer>
+
+<script data-cfasync="false">
+  // FAQ accordion
+  document.querySelectorAll('.faq-item').forEach(item => {
+    item.querySelector('.faq-q').addEventListener('click', () => {
+      const isOpen = item.classList.contains('open');
+      document.querySelectorAll('.faq-item').forEach(i => i.classList.remove('open'));
+      if (!isOpen) item.classList.add('open');
+    });
+  });
+
+  // Smooth scroll for anchor links
+  document.querySelectorAll('a[href^="#"]').forEach(a => {
+    a.addEventListener('click', e => {
+      const target = document.querySelector(a.getAttribute('href'));
+      if (target) {
+        e.preventDefault();
+        target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
+    });
+  });
+
+  // Simple counter animation for stats
+  function animateCount(el, target, suffix) {
+    let current = 0;
+    const step = Math.ceil(target / 40);
+    const timer = setInterval(() => {
+      current = Math.min(current + step, target);
+      el.textContent = current + suffix;
+      if (current >= target) clearInterval(timer);
+    }, 40);
+  }
+
+  // Intersection observer to trigger animations
+  const observer = new IntersectionObserver(entries => {
+    entries.forEach(e => {
+      if (e.isIntersecting) e.target.style.opacity = '1';
+    });
+  }, { threshold: 0.1 });
+
+  document.querySelectorAll('.feature-card, .testi-card, .problem-card').forEach(el => {
+    el.style.opacity = '0';
+    el.style.transition = 'opacity 0.5s ease';
+    observer.observe(el);
+  });
+</script>
+</body>
+</html>
