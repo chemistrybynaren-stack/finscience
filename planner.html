@@ -169,12 +169,21 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; b
   </div>
   <div class="header-btns">
     <button class="hbtn" onclick="saveData()" title="Data auto-saves in your browser">Saved ✓</button>
-    <button class="hbtn" onclick="downloadPDF()" style="background:#2c5f2e;color:#fff;">⬇ Download PDF</button>
-    <button class="hbtn danger" onclick="resetData()">Reset / Share</button>
+    <button class="hbtn" onclick="exportData()" title="Download your data as a backup file you can import on any device">⬇ Export Data</button>
+    <button class="hbtn" onclick="document.getElementById('importFile').click()" title="Restore data from a previously exported backup">⬆ Import Data</button>
+    <input type="file" id="importFile" accept=".json" style="display:none;" onchange="importData(this)">
+    <button class="hbtn" onclick="downloadPDF()" style="background:#2c5f2e;color:#fff;">⬇ PDF</button>
+    <button class="hbtn danger" onclick="resetData()">Reset</button>
   </div>
 </div>
 
 <div class="container">
+
+<!-- First-time visitor notice — hidden by JS once data is found -->
+<div id="freshStartBanner" class="banner warn" style="display:none;margin-bottom:1rem;">
+  👋 <strong>Welcome!</strong> You're seeing <em>sample data</em> — replace it with your own numbers in the Profile section above.
+  If you had data on another device, use <strong>Import Data</strong> in the top-right to restore it.
+</div>
 
 <div class="acc-panel" id="panel-profile">
   <div class="acc-header" data-panel="profile" onclick="window.togglePanel('profile')">
@@ -358,9 +367,9 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; b
 <div class="acc-panel" id="panel-goals">
   <div class="acc-header" data-panel="goals" onclick="window.togglePanel('goals')">
     <span>🎯 Goals &amp; Corpus</span>
-    <span class="acc-arrow" id="arrow-goals">▼</span>
+    <span class="acc-arrow open" id="arrow-goals">▼</span>
   </div>
-  <div class="acc-body" id="body-goals">
+  <div class="acc-body open" id="body-goals">
 <!-- ══════════════════════════════════════════
      SECTION 3 — FUTURE GOALS (LUMP SUM)
 ═══════════════════════════════════════════ -->
@@ -728,11 +737,11 @@ window.togglePanel = function(id) {
   var opening = !body.classList.contains('open');
   body.classList.toggle('open', opening);
   if (arrow) arrow.classList.toggle('open', opening);
-  if (opening && ['sip','projections','retirement','networth'].includes(id)) {
+  if (opening && ['goals','sip','projections','retirement','networth'].includes(id)) {
     setTimeout(function(){ try{update();}catch(e){} if(id==='sip'){try{renderAllocSection();}catch(e){}} }, 80);
   }
   try {
-    var saved = JSON.parse(localStorage.getItem('finplan_openPanels') || '["profile"]');
+    var saved = JSON.parse(localStorage.getItem('finplan_openPanels') || '["profile","goals"]');
     saved = opening ? saved.concat([id]).filter(function(v,i,a){return a.indexOf(v)===i;}) : saved.filter(function(x){return x!==id;});
     localStorage.setItem('finplan_openPanels', JSON.stringify(saved));
   } catch(e) {}
@@ -2048,18 +2057,55 @@ function saveData() {
   try { localStorage.setItem('finplan_v2', JSON.stringify(d)); } catch(e){}
 }
 
+function showFreshBanner() {
+  var el = document.getElementById('freshStartBanner');
+  if (el) el.style.display = '';
+}
+
 function loadData() {
   let d; try { d = JSON.parse(localStorage.getItem('finplan_v2')); } catch(e){ return false; }
-  if (!d) return false;
-  if (d.expRows)  expRows  = d.expRows;
-  if (d.goals)    goals    = d.goals;
-  if (d.reAssets) reAssets = d.reAssets;
+  if (!d) { showFreshBanner(); return false; }
+  // Only restore arrays when they have entries — avoids wiping defaults if user visits
+  // from a fresh domain (new deploy) or if data was accidentally saved empty
+  if (d.expRows  && d.expRows.length  > 0) expRows  = d.expRows;
+  if (d.goals    && d.goals.length    > 0) goals    = d.goals;
+  if (d.reAssets && d.reAssets.length > 0) reAssets = d.reAssets;
   if (d.ids) { nextExpId=d.ids.nextExpId||nextExpId; nextGoalId=d.ids.nextGoalId||nextGoalId; nextREId=d.ids.nextREId||nextREId; }
   if (d.expMode)  expMode  = d.expMode;
   if (d.inputs) {
     Object.entries(d.inputs).forEach(([k,v]) => { const el=document.getElementById(k); if(el) el.value=v; });
   }
   return true;
+}
+
+function exportData() {
+  try {
+    const raw = localStorage.getItem('finplan_v2');
+    if (!raw) { alert('No saved data yet — interact with the planner first, then export.'); return; }
+    const blob = new Blob([raw], { type: 'application/json' });
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = 'finscience-backup-' + new Date().toISOString().slice(0,10) + '.json';
+    a.click();
+    URL.revokeObjectURL(a.href);
+  } catch(e) { alert('Export failed: ' + e.message); }
+}
+
+function importData(input) {
+  const file = input.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    try {
+      const parsed = JSON.parse(e.target.result);
+      if (!parsed || typeof parsed !== 'object') throw new Error('Invalid file');
+      localStorage.setItem('finplan_v2', JSON.stringify(parsed));
+      alert('Data imported successfully! Reloading…');
+      location.reload();
+    } catch(err) { alert('Import failed — make sure you selected a valid finscience backup file.\n' + err.message); }
+  };
+  reader.readAsText(file);
+  input.value = ''; // reset so same file can be re-imported if needed
 }
 
 function resetData() {
@@ -2722,81 +2768,4 @@ function buildRetirementProjection(monthlySIP, stepUp, ca, ra, b1Fr, b2Fr, b3Fr,
 }
 
 function buildBucketGrowthChart(ca, ra, b1Target, b2Target, b3Target, b1Frac, b2Frac, b3Frac, monthlySIP, stepUp, r1, r2, r3) {
-  const n1 = Math.max(1, ra - ca);
-  const labels = [];
-  const b1Data = [], b2Data = [], b3Data = [];
-
-  let sip = monthlySIP;
-  let cumB1 = 0, cumB2 = 0, cumB3 = 0;
-
-  for (let y = 0; y < n1; y++) {
-    const age = ca + y;
-    const s1 = sip * b1Frac;
-    const s2 = sip * b2Frac;
-    const s3 = sip * (1 - b1Frac - b2Frac);
-    const yrsLeft = n1 - y;
-
-    cumB1 += (s1 * 12) * Math.pow(1 + (r1||0.07), yrsLeft);
-    cumB2 += (s2 * 12) * Math.pow(1 + (r2||0.09), yrsLeft);
-    cumB3 += (s3 * 12) * Math.pow(1 + (r3||0.12), yrsLeft);
-
-    labels.push('Age ' + age);
-    b1Data.push(Math.round(cumB1));
-    b2Data.push(Math.round(cumB2));
-    b3Data.push(Math.round(cumB3));
-    sip *= (1 + stepUp);
-  }
-
-  const ctx = document.getElementById('bucketGrowthChart');
-  if (!ctx) return;
-
-  if (bucketChart) { bucketChart.destroy(); bucketChart = null; }
-
-  const fmt = v => {
-    if (v >= 10000000) return '₹' + (v/10000000).toFixed(1) + 'Cr';
-    if (v >= 100000)   return '₹' + (v/100000).toFixed(1) + 'L';
-    return '₹' + Math.round(v).toLocaleString('en-IN');
-  };
-
-  bucketChart = new Chart(ctx, {
-    type: 'bar',
-    data: {
-      labels,
-      datasets: [
-        { label: 'B1 — Liquid/Debt (7%)',  data: b1Data, backgroundColor: '#34a85388', borderColor: '#34a853', borderWidth: 1 },
-        { label: 'B2 — Hybrid (9%)',        data: b2Data, backgroundColor: '#f5a62388', borderColor: '#f5a623', borderWidth: 1 },
-        { label: 'B3 — Equity (12%)',       data: b3Data, backgroundColor: '#185fa588', borderColor: '#185fa5', borderWidth: 1 },
-      ]
-    },
-    options: {
-      responsive: true,
-      maintainAspectRatio: true,
-      plugins: {
-        legend: { position: 'top', labels: { font: { size: 11 } } },
-        tooltip: {
-          callbacks: {
-            label: ctx => ' ' + ctx.dataset.label + ': ' + fmt(ctx.raw),
-            footer: items => {
-              const total = items.reduce((s, i) => s + i.raw, 0);
-              return 'Total: ' + fmt(total);
-            }
-          }
-        }
-      },
-      scales: {
-        x: { stacked: true, ticks: { font: { size: 9 } } },
-        y: {
-          stacked: true,
-          ticks: {
-            callback: v => fmt(v),
-            font: { size: 9 }
-          }
-        }
-      }
-    }
-  });
-}
-
-// togglePanel is defined at top of script as window.togglePanel
-// Restore open panels on load (default: profile open)
-// onclick attributes on heade
+  const n1 = Math.max(1, ra
