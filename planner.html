@@ -148,16 +148,20 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; b
   @page { size: A4 portrait; margin: 1.2cm 1.5cm; }
 }
 
-/* ── Accordion ───────────────────────────────────── */
-.acc-panel  { margin-bottom:0.6rem; border-radius:10px; border:1px solid #e0ddd8; overflow:hidden; }
-.acc-header { display:flex; justify-content:space-between; align-items:center; padding:14px 20px;
-              background:#f5f3ef; cursor:pointer; font-size:14px; font-weight:700;
-              color:#1a1a18; user-select:none; transition:background 0.15s; }
-.acc-header:hover { background:#ede9e3; }
-.acc-arrow  { font-size:11px; color:#888; transition:transform 0.22s; }
-.acc-arrow.open { transform:rotate(180deg); }
-.acc-body   { display:none; padding:1.25rem 1.5rem 1.5rem; }
-.acc-body.open { display:block; }
+/* ── Accordion — native <details>/<summary> — works everywhere, no JS needed ── */
+details.acc-panel { margin-bottom:0.6rem; border-radius:10px; border:1px solid #e0ddd8; overflow:hidden; }
+details.acc-panel summary {
+  display:flex; justify-content:space-between; align-items:center;
+  padding:14px 20px; background:#f5f3ef; cursor:pointer;
+  font-size:14px; font-weight:700; color:#1a1a18; user-select:none;
+  transition:background 0.15s; list-style:none; outline:none;
+}
+details.acc-panel summary::-webkit-details-marker { display:none; }
+details.acc-panel summary::marker { display:none; }
+details.acc-panel summary:hover { background:#ede9e3; }
+details.acc-panel summary .acc-arrow { font-size:11px; color:#888; transition:transform 0.22s; }
+details.acc-panel[open] summary .acc-arrow { transform:rotate(180deg); }
+details.acc-panel .acc-body { padding:1.25rem 1.5rem 1.5rem; }
 </style>
 </head>
 <body>
@@ -185,12 +189,12 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; b
   If you had data on another device, use <strong>Import Data</strong> in the top-right to restore it.
 </div>
 
-<div class="acc-panel" id="panel-profile">
-  <div class="acc-header" data-panel="profile" onclick="window.togglePanel('profile')">
+<details class="acc-panel" id="panel-profile" open>
+  <summary>
     <span>🏠 Profile &amp; Portfolio</span>
-    <span class="acc-arrow" id="arrow-profile">▼</span>
-  </div>
-  <div class="acc-body open" id="body-profile">
+    <span class="acc-arrow">▼</span>
+  </summary>
+  <div class="acc-body" id="body-profile">
 
 <!-- ══════════════════════════════════════════
      SECTION 1 — PROFILE + PORTFOLIO
@@ -362,14 +366,14 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; b
 </div>
 
   </div><!-- /acc-body -->
-</div><!-- /panel-profile -->
+</details><!-- /panel-profile -->
 
-<div class="acc-panel" id="panel-goals">
-  <div class="acc-header" data-panel="goals" onclick="window.togglePanel('goals')">
+<details class="acc-panel" id="panel-goals" open>
+  <summary>
     <span>🎯 Goals &amp; Corpus</span>
-    <span class="acc-arrow open" id="arrow-goals">▼</span>
-  </div>
-  <div class="acc-body open" id="body-goals">
+    <span class="acc-arrow">▼</span>
+  </summary>
+  <div class="acc-body" id="body-goals">
 <!-- ══════════════════════════════════════════
      SECTION 3 — FUTURE GOALS (LUMP SUM)
 ═══════════════════════════════════════════ -->
@@ -421,13 +425,13 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; b
 <div id="commitment-breakdown" style="margin-bottom:1.5rem;"></div>
 
   </div><!-- /acc-body -->
-</div><!-- /panel-goals -->
+</details><!-- /panel-goals -->
 
-<div class="acc-panel" id="panel-sip">
-  <div class="acc-header" data-panel="sip" onclick="window.togglePanel('sip')">
+<details class="acc-panel" id="panel-sip">
+  <summary>
     <span>📊 SIP Planner</span>
-    <span class="acc-arrow" id="arrow-sip">▼</span>
-  </div>
+    <span class="acc-arrow">▼</span>
+  </summary>
   <div class="acc-body" id="body-sip">
 <div class="section-label">2b — Investment Allocation Guide — Bucket-wise SIP Split</div>
 <div class="card" style="margin-bottom:1.5rem;" id="alloc-section">
@@ -468,13 +472,13 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; b
   </div>
 </div>
   </div><!-- /acc-body -->
-</div><!-- /panel-sip -->
+</details><!-- /panel-sip -->
 
-<div class="acc-panel" id="panel-retirement">
-  <div class="acc-header" data-panel="retirement" onclick="window.togglePanel('retirement')">
+<details class="acc-panel" id="panel-retirement">
+  <summary>
     <span>🪣 Withdrawal Strategy</span>
-    <span class="acc-arrow" id="arrow-retirement">▼</span>
-  </div>
+    <span class="acc-arrow">▼</span>
+  </summary>
   <div class="acc-body" id="body-retirement">
 <!-- ══════════════════════════════════════════
      SECTION 5 — WITHDRAWAL STRATEGY
@@ -544,13 +548,13 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; b
 </div>
 
   </div><!-- /acc-body -->
-</div><!-- /panel-retirement -->
+</details><!-- /panel-retirement -->
 
-<div class="acc-panel" id="panel-networth">
-  <div class="acc-header" data-panel="networth" onclick="window.togglePanel('networth')">
+<details class="acc-panel" id="panel-networth">
+  <summary>
     <span>💰 Net Worth</span>
-    <span class="acc-arrow" id="arrow-networth">▼</span>
-  </div>
+    <span class="acc-arrow">▼</span>
+  </summary>
   <div class="acc-body" id="body-networth">
 <!-- ══════════════════════════════════════════
      SECTION 6 — NET WORTH TRACKER
@@ -658,13 +662,13 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; b
 </div>
 
   </div><!-- /acc-body -->
-</div><!-- /panel-networth -->
+</details><!-- /panel-networth -->
 
-<div class="acc-panel" id="panel-projections">
-  <div class="acc-header" data-panel="projections" onclick="window.togglePanel('projections')">
+<details class="acc-panel" id="panel-projections">
+  <summary>
     <span>📈 Projections &amp; Insights</span>
-    <span class="acc-arrow" id="arrow-projections">▼</span>
-  </div>
+    <span class="acc-arrow">▼</span>
+  </summary>
   <div class="acc-body" id="body-projections">
 <!-- ══════════════════════════════════════════
      SECTION 6 — CHARTS
@@ -716,7 +720,7 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; b
 </div>
 
   </div><!-- /acc-body -->
-</div><!-- /panel-projections -->
+</details><!-- /panel-projections -->
 
 </div><!-- /container -->
 
@@ -729,23 +733,35 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; b
      JAVASCRIPT
 ═══════════════════════════════════════════ -->
 <script data-cfasync="false">
-/* ─── Accordion — defined FIRST so onclick attributes always find it ─── */
-window.togglePanel = function(id) {
-  var body  = document.getElementById('body-'  + id);
-  var arrow = document.getElementById('arrow-' + id);
-  if (!body) return;
-  var opening = !body.classList.contains('open');
-  body.classList.toggle('open', opening);
-  if (arrow) arrow.classList.toggle('open', opening);
-  if (opening && ['goals','sip','projections','retirement','networth'].includes(id)) {
-    setTimeout(function(){ try{update();}catch(e){} if(id==='sip'){try{renderAllocSection();}catch(e){}} }, 80);
-  }
-  try {
-    var saved = JSON.parse(localStorage.getItem('finplan_openPanels') || '["profile","goals"]');
-    saved = opening ? saved.concat([id]).filter(function(v,i,a){return a.indexOf(v)===i;}) : saved.filter(function(x){return x!==id;});
-    localStorage.setItem('finplan_openPanels', JSON.stringify(saved));
-  } catch(e) {}
-};
+/* ─── Accordion — uses native <details> toggle event, no onclick JS needed ─── */
+/* togglePanel kept as no-op for any legacy references that might remain      */
+window.togglePanel = function(id) {};
+
+document.addEventListener('DOMContentLoaded', function() {
+  var panels = ['profile','goals','sip','retirement','networth','projections'];
+  panels.forEach(function(id) {
+    var el = document.getElementById('panel-' + id);
+    if (!el) return;
+    el.addEventListener('toggle', function() {
+      var opening = el.open;
+      // Trigger recalculation when certain panels are opened
+      if (opening && ['goals','sip','projections','retirement','networth'].includes(id)) {
+        setTimeout(function(){
+          try { update(); } catch(e) {}
+          if (id === 'sip') { try { renderAllocSection(); } catch(e) {} }
+        }, 80);
+      }
+      // Persist open state
+      try {
+        var saved = JSON.parse(localStorage.getItem('finplan_openPanels') || '["profile","goals"]');
+        saved = opening
+          ? saved.concat([id]).filter(function(v,i,a){ return a.indexOf(v)===i; })
+          : saved.filter(function(x){ return x !== id; });
+        localStorage.setItem('finplan_openPanels', JSON.stringify(saved));
+      } catch(e) {}
+    });
+  });
+});
 
 /* ─── Helpers ─── */
 const fmtCr = n => {
@@ -2768,4 +2784,5 @@ function buildRetirementProjection(monthlySIP, stepUp, ca, ra, b1Fr, b2Fr, b3Fr,
 }
 
 function buildBucketGrowthChart(ca, ra, b1Target, b2Target, b3Target, b1Frac, b2Frac, b3Frac, monthlySIP, stepUp, r1, r2, r3) {
-  const n1 = Math.max(1, ra
+  const n1 = Math.max(1, ra - ca);
+  const labe
