@@ -286,7 +286,7 @@ details.acc-panel .acc-body { padding:1.25rem 1.5rem 1.5rem; }
       </div>
       <div id="port-split-status" style="font-size:11px;line-height:1.5;"></div>
       <!-- Goal fund portfolios — rendered dynamically when non-corpus goals exist -->
-      <div id="goal-port-section"></div>
+      <!-- Goal fund inputs moved into Goals tab -->
     </div>
     <div class="sl-group">
       <label>Pre-retirement return (p.a.) <span id="preReturnVal">10%</span></label>
@@ -385,16 +385,17 @@ details.acc-panel .acc-body { padding:1.25rem 1.5rem 1.5rem; }
   <div style="overflow-x:auto;">
   <table class="etable" id="goalsTable">
     <thead><tr>
-      <th style="width:15%">Goal name</th>
-      <th class="r" style="width:11%">Amount today (₹)</th>
-      <th class="r" style="width:6%">Years</th>
-      <th class="r" style="width:6%">Age</th>
-      <th class="r" style="width:7%">Return %</th>
-      <th class="r" style="width:12%">Future Target</th>
-      <th class="r" style="width:13%" title="Monthly SIP in today's rupees. Runs until the goal year (not till retirement). SIP stops the year the goal is due.">Monthly SIP (today ₹)<br><span style="font-size:9px;font-weight:400;color:#aaa;">runs until goal year ↓</span></th>
-      <th style="width:8%" title="Tick if this goal will be paid from the liquid corpus (shows as deduction in year-by-year table)">From corpus?</th>
-      <th style="width:8%" title="Tick if the amount entered is in today's rupees and needs inflation adjustment. Leave unticked if the amount is already the future expected cost (e.g. you know the exact future price).">Inflate amt?</th>
-      <th class="r" style="width:11%">Corpus withdrawal</th>
+      <th style="width:13%">Goal name</th>
+      <th class="r" style="width:10%">Amount today (₹)</th>
+      <th class="r" style="width:9%" title="Existing savings already set aside for this goal (current value). Grows at the goal's return % — reduces SIP/corpus needed.">Existing ₹<br><span style="font-size:9px;font-weight:400;color:#aaa;">set aside already</span></th>
+      <th class="r" style="width:5%">Years</th>
+      <th class="r" style="width:5%">Age</th>
+      <th class="r" style="width:6%">Return %</th>
+      <th class="r" style="width:11%">Future Target</th>
+      <th class="r" style="width:12%" title="Monthly SIP in today's rupees. Runs until the goal year (not till retirement). SIP stops the year the goal is due.">Monthly SIP (today ₹)<br><span style="font-size:9px;font-weight:400;color:#aaa;">runs until goal year ↓</span></th>
+      <th style="width:6%" title="Tick if this goal will be paid from the liquid corpus (shows as deduction in year-by-year table)">From corpus?</th>
+      <th style="width:6%" title="Tick if the amount entered is in today's rupees and needs inflation adjustment. Leave unticked if the amount is already the future expected cost (e.g. you know the exact future price).">Inflate amt?</th>
+      <th class="r" style="width:10%">Corpus withdrawal</th>
       <th style="width:4%;text-align:center;color:#c0392b;font-size:10px;">Remove</th>
     </tr></thead>
     <tbody id="goalsBody"></tbody>
@@ -1001,8 +1002,9 @@ function renderGoals() {
 
     const tr = document.createElement('tr');
     tr.innerHTML = `
-      <td><input type="text" value="${g.name}" placeholder="Goal name" oninput="goals[${i}].name=this.value;renderGoals();saveData();" style="min-width:100px;"></td>
+      <td><input type="text" value="${g.name}" placeholder="Goal name" oninput="goals[${i}].name=this.value;renderGoals();saveData();" style="min-width:90px;"></td>
       <td><input type="number" value="${g.amount}" min="10000" step="100000" oninput="goals[${i}].amount=+this.value||0;renderGoals();update();saveData();"></td>
+      <td><input type="number" value="${g.currentInvestment||0}" min="0" step="10000" title="Current savings already set aside for this goal" oninput="goals[${i}].currentInvestment=+this.value||0;renderGoals();update();saveData();" style="width:76px;"></td>
       <td class="r"><input type="number" value="${g.years}" min="1" max="40" step="1" oninput="goals[${i}].years=+this.value||1;renderGoals();update();saveData();" style="width:50px;"></td>
       <td class="r" style="color:#5f5e5a;font-weight:500;">${goalAge}</td>
       <td class="r"><input type="number" value="${g.ret}" min="4" max="20" step="0.5" oninput="goals[${i}].ret=+this.value||8;renderGoals();update();saveData();" style="width:48px;"></td>
@@ -1035,7 +1037,51 @@ function renderGoals() {
   if (viaOwnSIP > 0)
     notes.push('🎯 <strong>' + viaOwnSIP + ' goal' + (viaOwnSIP>1?'s need':' needs') + ' a dedicated SIP</strong> — each gets its own separate mutual fund, invested alongside (not inside) your B1/B2/B3 retirement SIPs. See <strong>Section 4 — SIP Planner</strong> for the complete breakdown: your total ₹' + mainSIP + '/month is split between retirement buckets and these goal funds.');
   document.getElementById('goalsNote').innerHTML = notes.map(n => `<div class="banner" style="margin-bottom:6px;font-size:12px;">${n}</div>`).join('');
-  renderGoalPortInputs();  // sync Portfolio & Returns section
+
+  // ── SIP split summary banner ──────────────────────────────────────
+  const totalMonthly = Math.round((+document.getElementById('annualInvestment').value||0)/12);
+  let totalGoalSIP = 0;
+  goals.forEach((g) => {
+    const sipYrs2 = Math.min(g.years||1, n1);
+    if (sipYrs2 <= 0) return;
+    const infT2  = g.inflAdj ? (g.amount||0)*Math.pow(1+inflRate, g.years||1) : (g.amount||0);
+    const fvEx2  = (g.currentInvestment||0)*Math.pow(1+(g.ret||10)/100, g.years||1);
+    const need2  = Math.max(0, infT2 - fvEx2);
+    const postR2 = Math.max(0,(g.years||1)-n1);
+    const adjN2  = (postR2 > 0 && sipYrs2 > 0) ? need2/Math.pow(1+(g.ret||10)/100, postR2) : need2;
+    totalGoalSIP += goalSIP(adjN2, sipYrs2, g.ret||10);
+  });
+  totalGoalSIP = Math.round(totalGoalSIP);
+  const retireSIP = Math.max(0, totalMonthly - totalGoalSIP);
+  const sipSumEl = document.getElementById('goalSipSummary');
+  if (sipSumEl) {
+    if (totalMonthly > 0 || totalGoalSIP > 0) {
+      sipSumEl.style.display = '';
+      sipSumEl.innerHTML = `
+        <div style="background:linear-gradient(135deg,#f0f7ff,#e8f4e8);border:1px solid #b8d4f0;border-radius:10px;padding:12px 16px;display:flex;flex-wrap:wrap;gap:18px;align-items:center;">
+          <div style="font-size:11px;font-weight:700;color:#1a1a18;letter-spacing:0.02em;">📊 Monthly SIP split</div>
+          <div style="display:flex;gap:22px;flex-wrap:wrap;">
+            <div style="text-align:center;">
+              <div style="font-size:18px;font-weight:800;color:#185fa5;">₹\${totalMonthly.toLocaleString('en-IN')}</div>
+              <div style="font-size:10px;color:#888;">Total monthly SIP</div>
+            </div>
+            <div style="font-size:20px;color:#ccc;line-height:1.6;">＝</div>
+            <div style="text-align:center;">
+              <div style="font-size:18px;font-weight:800;color:#c47d00;">₹\${totalGoalSIP.toLocaleString('en-IN')}</div>
+              <div style="font-size:10px;color:#888;">Goals SIP</div>
+            </div>
+            <div style="font-size:20px;color:#ccc;line-height:1.6;">＋</div>
+            <div style="text-align:center;">
+              <div style="font-size:18px;font-weight:800;color:#1a6e35;">₹\${retireSIP.toLocaleString('en-IN')}</div>
+              <div style="font-size:10px;color:#888;">Retirement SIP</div>
+            </div>
+          </div>
+          \${totalGoalSIP > totalMonthly ? '<div style="font-size:11px;color:#c0392b;font-weight:600;">⚠️ Goal SIPs exceed your total monthly investment — increase your investment or reduce goals.</div>' : ''}
+        </div>`;
+    } else {
+      sipSumEl.style.display = 'none';
+    }
+  }
 }
 
 /* ════════════════════════════════════════════
