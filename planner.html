@@ -173,7 +173,7 @@ details.acc-panel .acc-body { padding:1.25rem 1.5rem 1.5rem; }
   </div>
   <div class="header-btns">
     <button class="hbtn" onclick="saveData()" title="Data auto-saves in your browser">Saved ✓</button>
-        <span style="font-size:10px;background:#2c5f2e;color:#fff;padding:3px 8px;border-radius:12px;font-weight:700;letter-spacing:0.04em;">v19</span>
+        <span style="font-size:10px;background:#2c5f2e;color:#fff;padding:3px 8px;border-radius:12px;font-weight:700;letter-spacing:0.04em;">v20</span>
     <button class="hbtn" onclick="exportData()" title="Download your data as a backup">⬇ Export Data</button>
     <button class="hbtn" onclick="document.getElementById('importFile').click()" title="Restore from backup">⬆ Import Data</button>
     <input type="file" id="importFile" accept=".json" style="display:none;" onchange="importData(this)">
@@ -205,19 +205,19 @@ details.acc-panel .acc-body { padding:1.25rem 1.5rem 1.5rem; }
   <div class="card">
     <div class="card-title">Your profile</div>
     <div class="input-row">
-      <div class="ig"><label>Current age</label><input type="number" id="currentAge" value="34" min="18" max="60" step="1"></div>
-      <div class="ig"><label>Retirement age</label><input type="number" id="retirementAge" value="40" min="30" max="70" step="1"></div>
+      <div class="ig"><label>Current age</label><input type="number" id="currentAge" value="34" min="18" max="60" step="any"></div>
+      <div class="ig"><label>Retirement age</label><input type="number" id="retirementAge" value="40" min="30" max="70" step="any"></div>
     </div>
     <div class="input-row">
-      <div class="ig"><label>Life expectancy</label><input type="number" id="lifeExpectancy" value="85" min="60" max="100" step="1"><span class="hint">Plan for 85+ (India avg ~70)</span></div>
+      <div class="ig"><label>Life expectancy</label><input type="number" id="lifeExpectancy" value="85" min="60" max="100" step="any"><span class="hint">Plan for 85+ (India avg ~70)</span></div>
     </div>
   </div>
 
   <div class="card">
     <div class="card-title">Portfolio &amp; Returns</div>
     <div class="input-row">
-      <div class="ig"><label>Total current savings (₹) <span style="font-weight:400;color:#999;font-size:10px;">incl. emergency reserves</span></label><input type="number" id="currentPortfolio" value="5000000" min="0" step="100000"></div>
-      <div class="ig"><label>Annual additional investment (₹)</label><input type="number" id="annualInvestment" value="1000000" min="0" step="100000"></div>
+      <div class="ig"><label>Total current savings (₹) <span style="font-weight:400;color:#999;font-size:10px;">incl. emergency reserves</span></label><input type="number" id="currentPortfolio" value="5000000" min="0" step="any"></div>
+      <div class="ig"><label>Annual additional investment (₹)</label><input type="number" id="annualInvestment" value="1000000" min="0" step="any"></div>
     </div>
     <!-- Portfolio bucket split -->
     <div style="margin:0.65rem 0 0.5rem;padding:11px 13px;background:#f8f7f3;border-radius:9px;border:1px solid #e8e5e0;">
@@ -228,11 +228,11 @@ details.acc-panel .acc-body { padding:1.25rem 1.5rem 1.5rem; }
       <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:0.6rem;margin-bottom:7px;">
         <div class="ig" style="margin:0;">
           <label style="color:#34a853;font-size:11px;">💰 B1 — Liquid / Debt</label>
-          <input type="number" id="portB1" value="0" min="0" step="100000"
+          <input type="number" id="portB1" value="0" min="0" step="any"
             oninput="syncPortfolioSplit(); renderAllocSection(); update();">
           <div style="display:flex;align-items:center;gap:4px;margin-top:4px;">
             <span style="font-size:10px;color:#888;">Return:</span>
-            <input type="number" id="portB1Rate" value="7" min="1" max="20" step="0.5"
+            <input type="number" id="portB1Rate" value="7" min="1" max="20" step="any"
               style="width:44px;font-size:11px;padding:2px 4px;border:1px solid #ddd;border-radius:4px;text-align:center;"
               oninput="renderAllocSection(); update();">
             <span style="font-size:10px;color:#888;">% p.a.</span>
@@ -240,11 +240,11 @@ details.acc-panel .acc-body { padding:1.25rem 1.5rem 1.5rem; }
         </div>
         <div class="ig" style="margin:0;">
           <label style="color:#c47d00;font-size:11px;">🔄 B2 — Hybrid / Debt+</label>
-          <input type="number" id="portB2" value="0" min="0" step="100000"
+          <input type="number" id="portB2" value="0" min="0" step="any"
             oninput="syncPortfolioSplit(); renderAllocSection(); update();">
           <div style="display:flex;align-items:center;gap:4px;margin-top:4px;">
             <span style="font-size:10px;color:#888;">Return:</span>
-            <input type="number" id="portB2Rate" value="9" min="1" max="20" step="0.5"
+            <input type="number" id="portB2Rate" value="9" min="1" max="20" step="any"
               style="width:44px;font-size:11px;padding:2px 4px;border:1px solid #ddd;border-radius:4px;text-align:center;"
               oninput="renderAllocSection(); update();">
             <span style="font-size:10px;color:#888;">% p.a.</span>
@@ -252,11 +252,11 @@ details.acc-panel .acc-body { padding:1.25rem 1.5rem 1.5rem; }
         </div>
         <div class="ig" style="margin:0;">
           <label style="color:#185fa5;font-size:11px;">📈 B3 — Equity</label>
-          <input type="number" id="portB3" value="0" min="0" step="100000"
+          <input type="number" id="portB3" value="0" min="0" step="any"
             oninput="syncPortfolioSplit(); renderAllocSection(); update();">
           <div style="display:flex;align-items:center;gap:4px;margin-top:4px;">
             <span style="font-size:10px;color:#888;">Return:</span>
-            <input type="number" id="portB3Rate" value="12" min="1" max="20" step="0.5"
+            <input type="number" id="portB3Rate" value="12" min="1" max="20" step="any"
               style="width:44px;font-size:11px;padding:2px 4px;border:1px solid #ddd;border-radius:4px;text-align:center;"
               oninput="renderAllocSection(); update();">
             <span style="font-size:10px;color:#888;">% p.a.</span>
@@ -267,7 +267,7 @@ details.acc-panel .acc-body { padding:1.25rem 1.5rem 1.5rem; }
       <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:0.6rem;margin-bottom:7px;padding-top:7px;border-top:1px dashed #ddd;">
         <div class="ig" style="margin:0;">
           <label style="color:#c0392b;font-size:11px;">🏥 Health Emergency Fund (₹)</label>
-          <input type="number" id="healthEmergencyLump" value="500000" min="0" step="50000"
+          <input type="number" id="healthEmergencyLump" value="500000" min="0" step="any"
             oninput="syncPortfolioSplit();">
           <div id="healthEmergencyLump_hint" style="font-size:10px;font-weight:600;color:#185fa5;margin-top:2px;min-height:14px;"></div>
           <span style="font-size:10px;color:#888;">Kept in savings/liquid MF — for hospital emergencies not covered by insurance</span>
@@ -361,7 +361,7 @@ details.acc-panel .acc-body { padding:1.25rem 1.5rem 1.5rem; }
   <div id="exp-lumpsum" style="display:none;">
     <div class="ig" style="max-width:300px;">
       <label>Total monthly expense (₹)</label>
-      <input type="number" id="monthlyExpenseLump" value="50000" min="1000" step="500">
+      <input type="number" id="monthlyExpenseLump" value="50000" min="1000" step="any">
       <span class="hint">In today's value — inflation applied automatically</span>
     </div>
   </div>
@@ -387,7 +387,6 @@ details.acc-panel .acc-body { padding:1.25rem 1.5rem 1.5rem; }
 ═══════════════════════════════════════════ -->
 <div class="section-label">3 — Future Goals &amp; Lump-Sum Targets</div>
 
-<div id="goalSipSummary" style="display:none;margin-bottom:0.75rem;"></div>
 
 <div class="card" style="margin-bottom:1.5rem;">
   <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:0.75rem;flex-wrap:wrap;gap:8px;">
@@ -404,9 +403,8 @@ details.acc-panel .acc-body { padding:1.25rem 1.5rem 1.5rem; }
       <th class="r" style="width:6%">Age</th>
       <th class="r" style="width:8%">Return %</th>
       <th class="r" style="width:13%">Future Target</th>
-      <th style="width:8%" title="Tick = paid from retirement corpus at goal age. Untick = dedicated SIP deducted from your annual investment.">From corpus?</th>
       <th style="width:8%" title="Tick if amount is today's price and needs inflation adjustment.">Inflate amt?</th>
-      <th class="r" style="width:13%">Corpus withdrawal</th>
+      <th class="r" style="width:13%">Monthly SIP</th>
       <th style="width:5%;text-align:center;color:#c0392b;font-size:10px;">Remove</th>
     </tr></thead>
     <tbody id="goalsBody"></tbody>
@@ -426,18 +424,24 @@ details.acc-panel .acc-body { padding:1.25rem 1.5rem 1.5rem; }
   </summary>
   <div class="acc-body" id="body-sip">
 <div class="section-label">2b — Investment Allocation Guide — Bucket-wise SIP Split</div>
+<div id="goalSipSummary" style="display:none;margin-bottom:0.75rem;"></div>
 <div class="card" style="margin-bottom:1.5rem;" id="alloc-section">
   <div style="display:flex;align-items:flex-end;gap:1.5rem;flex-wrap:wrap;margin-bottom:1.25rem;">
     <div class="ig" style="min-width:230px;">
       <label style="font-size:12px;font-weight:600;color:#555;">Monthly SIP → Retirement buckets (₹)
         <span style="font-size:10px;font-weight:400;color:#aaa;"> (auto)</span>
       </label>
-      <input type="number" id="allocMonthlySIP" min="0" step="500"
+      <input type="number" id="allocMonthlySIP" min="0" step="any"
              style="font-size:15px;font-weight:700;background:#f0f8ff;color:#185fa5;border-color:#b0d4f0;"
              readonly title="Auto-calculated: Total annual investment ÷ 12 − goal SIPs">
       <div id="alloc-sip-hint" style="font-size:10px;color:#888;margin-top:3px;line-height:1.5;"></div>
     </div>
     <span style="font-size:12px;color:#888;align-self:center;" id="alloc-years-label"></span>
+  </div>
+  <!-- Goal SIP cards — one per active goal, auto-populated by syncPortfolioSplit() -->
+  <div id="goal-sip-cards" style="display:none;margin-bottom:1.25rem;padding:12px 14px;background:linear-gradient(135deg,#fffbf0,#fff8e8);border:1px solid #f0d080;border-radius:10px;">
+    <div style="font-size:11px;font-weight:700;color:#8b6914;margin-bottom:8px;">🎯 Goal Fund SIPs — dedicated investments (separate from retirement)</div>
+    <div id="goal-sip-cards-inner" style="display:flex;flex-wrap:wrap;gap:10px;"></div>
   </div>
   <div style="font-size:13px;font-weight:600;color:#444;margin-bottom:0.5rem;">
     Year-by-year SIP distribution (with step-up)
@@ -513,9 +517,9 @@ details.acc-panel .acc-body { padding:1.25rem 1.5rem 1.5rem; }
 
   <!-- Inputs row -->
   <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-top:0.75rem;max-width:480px;">
-    <div class="ig"><label>B1 — Liquid years</label><input type="number" id="b1Years" value="2" min="1" max="5" step="1" oninput="buildWithdrawalStrategy(); update(); renderAllocSection(); saveData();"><span class="hint">In liquid fund ~7%</span></div>
-    <div class="ig"><label>B2 — Debt years</label><input type="number" id="b2Years" value="7" min="2" max="15" step="1" oninput="buildWithdrawalStrategy(); update(); renderAllocSection(); saveData();"><span class="hint">In debt/hybrid ~8%</span></div>
-    <div class="ig"><label>B3 — Equity return %</label><input type="number" id="b3Return" value="12" min="8" max="18" step="0.5" oninput="buildWithdrawalStrategy(); update(); renderAllocSection(); saveData();"><span class="hint">Equity fund p.a.</span></div>
+    <div class="ig"><label>B1 — Liquid years</label><input type="number" id="b1Years" value="2" min="1" max="5" step="any" oninput="buildWithdrawalStrategy(); update(); renderAllocSection(); saveData();"><span class="hint">In liquid fund ~7%</span></div>
+    <div class="ig"><label>B2 — Debt years</label><input type="number" id="b2Years" value="7" min="2" max="15" step="any" oninput="buildWithdrawalStrategy(); update(); renderAllocSection(); saveData();"><span class="hint">In debt/hybrid ~8%</span></div>
+    <div class="ig"><label>B3 — Equity return %</label><input type="number" id="b3Return" value="12" min="8" max="18" step="any" oninput="buildWithdrawalStrategy(); update(); renderAllocSection(); saveData();"><span class="hint">Equity fund p.a.</span></div>
   </div>
 
   <!-- Full-width SWP table -->
@@ -604,12 +608,12 @@ details.acc-panel .acc-body { padding:1.25rem 1.5rem 1.5rem; }
     <div class="input-row" style="margin-bottom:0.5rem;">
       <div class="ig">
         <label>Gold weight (grams)</label>
-        <input type="number" id="goldGrams" value="100" min="0" step="5">
+        <input type="number" id="goldGrams" value="100" min="0" step="any">
         <span class="hint">24K equivalent</span>
       </div>
       <div class="ig">
         <label>Price per gram (₹)</label>
-        <input type="number" id="goldPrice" value="7500" min="1000" step="100">
+        <input type="number" id="goldPrice" value="7500" min="1000" step="any">
         <span class="hint">Update with today's rate</span>
       </div>
     </div>
@@ -835,10 +839,10 @@ function renderExpTable() {
     const tr = document.createElement('tr');
     tr.innerHTML = `
       <td><input type="text" value="${row.name}" placeholder="e.g. Groceries" oninput="expRows[${i}].name=this.value;updateExpViz();saveData();"></td>
-      <td><input type="number" value="${row.amount}" min="0" step="500" oninput="expRows[${i}].amount=+this.value||0;renderExpPcts();updateExpViz();update();saveData();"></td>
+      <td><input type="number" value="${row.amount}" min="0" step="any" oninput="expRows[${i}].amount=+this.value||0;renderExpPcts();updateExpViz();update();saveData();"></td>
       <td class="r exp-pct-${row.id}">${pct}</td>
       <td><input type="text" value="${row.note}" placeholder="e.g. until kids finish school" oninput="expRows[${i}].note=this.value;saveData();"></td>
-      <td><input type="number" value="${row.untilAge||''}" placeholder="—" min="35" max="90" step="1" title="Enter your age at which this expense ends (leave blank for ongoing)" oninput="expRows[${i}].untilAge=this.value;update();saveData();" style="width:54px;"></td>
+      <td><input type="number" value="${row.untilAge||''}" placeholder="—" min="35" max="90" step="any" title="Enter your age at which this expense ends (leave blank for ongoing)" oninput="expRows[${i}].untilAge=this.value;update();saveData();" style="width:54px;"></td>
       <td><button class="del-btn" onclick="deleteExpRow(${row.id})">×</button></td>`;
     tbody.appendChild(tr);
   });
@@ -883,14 +887,14 @@ function updateExpViz() {
    GOALS SYSTEM
 ════════════════════════════════════════════ */
 let goals = [
-  { id:1, name:"Child 1 — Higher education", amount:10000000, years:16, ret:12, gender:'girl', notes:"Child currently age 4", inflAdj:false, fromCorpus:true },
-  { id:2, name:"Child 2 — Higher education", amount:10000000, years:19, ret:12, gender:'boy',  notes:"Child currently age 1", inflAdj:false, fromCorpus:true },
-  { id:3, name:"Car purchase",               amount:5000000,  years:5,  ret:10, gender:'na',   notes:"Upgrade in 5 years",   inflAdj:true,  fromCorpus:true },
+  { id:1, name:"Child 1 — Higher education", amount:10000000, years:16, ret:12, gender:'girl', notes:"Child currently age 4", inflAdj:false, fromCorpus:false },
+  { id:2, name:"Child 2 — Higher education", amount:10000000, years:19, ret:12, gender:'boy',  notes:"Child currently age 1", inflAdj:false, fromCorpus:false },
+  { id:3, name:"Car purchase",               amount:5000000,  years:5,  ret:10, gender:'na',   notes:"Upgrade in 5 years",   inflAdj:true,  fromCorpus:false },
 ];
 let nextGoalId = 4;
 
 function addGoalRow() {
-  goals.push({ id:nextGoalId++, name:'', amount:500000, years:5, ret:10, gender:'na', notes:'', inflAdj:false, fromCorpus:true, currentInvestment:0 });
+  goals.push({ id:nextGoalId++, name:'', amount:500000, years:5, ret:10, gender:'na', notes:'', inflAdj:false, fromCorpus:false, currentInvestment:0 });
   renderGoals(); saveData();
 }
 
@@ -922,13 +926,12 @@ function renderGoalPortInputs() {
           const fvExisting   = (g.currentInvestment||0) * Math.pow(1 + (g.ret||10)/100, g.years||1);
           const coversPct    = futureTarget > 0 ? Math.min(100, Math.round(fvExisting / futureTarget * 100)) : 0;
           const coverColor   = coversPct >= 80 ? '#1a6e35' : coversPct >= 40 ? '#c47d00' : '#c0392b';
-          const modeLabel    = g.fromCorpus !== false ? '🏦 corpus' : '📈 SIP fund';
           return `
           <div class="ig" style="margin:0;background:#fff;padding:9px 11px;border-radius:8px;border:1px solid #f0e0a0;">
             <label style="color:#7a5800;font-size:11px;font-weight:700;">🎯 ${g.name || 'Unnamed Goal'}
-              <span style="font-weight:400;color:#bbb;"> · ${g.years}yr · ${g.ret||10}% · ${modeLabel}</span>
+              <span style="font-weight:400;color:#bbb;"> · ${g.years}yr · ${g.ret||10}% · 📈 SIP</span>
             </label>
-            <input type="number" value="${g.currentInvestment||0}" min="0" step="10000"
+            <input type="number" value="${g.currentInvestment||0}" min="0" step="any"
               placeholder="0"
               oninput="updateGoalInvestment(${g.id}, this.value)"
               style="margin-top:4px;">
@@ -1001,34 +1004,22 @@ function renderGoals() {
     } else {
       sipDurationNote = `for ${g.years} yr${g.years>1?'s':''} · stops at age ${goalAge}`;
     }
-    const isNonCorpus = g.fromCorpus === false;
-    let sipTag;
-    if (!isNonCorpus) {
-      sipTag = `<span style="color:#8b6914;font-weight:600;font-size:11px;">🏦 From corpus</span>
-                <div style="font-size:9px;color:#888;">Withdrawn from retirement fund at age ${goalAge}</div>
-                ${fvExisting>1000?`<div style="font-size:9px;color:#1a6e35;">existing → ${fmtCr(Math.round(fvExisting))} by goal date</div>`:''}`;
-    } else if (sip > 0) {
-      sipTag = `<span style="font-weight:600;color:#185fa5;">₹${Math.round(sip).toLocaleString('en-IN')}/mo</span>
-               <div style="font-size:9px;color:#777;">Dedicated SIP · ${sipDurationNote}</div>
-               <div style="font-size:9px;color:#c47d00;">⬇ deducted from your annual investment</div>
-               ${fvExisting>1000?`<div style="font-size:9px;color:#1a6e35;">existing → ${fmtCr(Math.round(fvExisting))}</div>`:''}`;
-    } else {
-      sipTag = `<span style="color:#1a6e35;font-weight:600;">✅ Fully covered by existing savings</span>`;
-    }
-    const fromCorpus = g.fromCorpus !== false; // default true
     const inflAdj    = g.inflAdj === true;
 
-    const corpusTag = fromCorpus
-      ? `<span style="font-weight:500;color:#a32d2d;">${fmtCr(corpusAmt)}</span><div style="font-size:9px;color:#888780;">at age ${goalAge}</div>`
-      : `<span style="color:#b4b2a9;font-size:12px;">via SIP only</span>`;
+    // All goals use dedicated SIP — no corpus withdrawal option
+    let sipTag;
+    if (sip > 0) {
+      sipTag = '<span style="font-weight:600;color:#185fa5;">₹' + Math.round(sip).toLocaleString('en-IN') + '/mo</span>'
+             + '<div style="font-size:9px;color:#777;">Dedicated SIP · ' + sipDurationNote + '</div>'
+             + '<div style="font-size:9px;color:#c47d00;">⬇ deducted from your annual investment</div>'
+             + (fvExisting>1000?'<div style="font-size:9px;color:#1a6e35;">existing → ' + fmtCr(Math.round(fvExisting)) + '</div>':'');
+    } else {
+      sipTag = '<span style="color:#1a6e35;font-weight:600;">✅ Fully covered by existing savings</span>';
+    }
 
     // Build SIP info for the sub-row
     let sipInfo;
-    if (!isNonCorpus) {
-      sipInfo = '<span style="color:#8b6914;font-weight:700;">🏦 Funded from retirement corpus</span>'
-        + ' — ₹' + fmtCr(corpusAmt) + ' withdrawn at age ' + goalAge
-        + (fvExisting > 1000 ? ' &nbsp;·&nbsp; <span style="color:#1a6e35;">existing savings → ' + fmtCr(Math.round(fvExisting)) + ' by goal date</span>' : '');
-    } else if (sip > 0) {
+    if (sip > 0) {
       sipInfo = '<span style="color:#185fa5;font-weight:700;">📈 Dedicated SIP: ₹' + Math.round(sip).toLocaleString('en-IN') + '/mo</span>'
         + ' &nbsp;(₹' + Math.round(sip*12).toLocaleString('en-IN') + '/yr)'
         + ' &nbsp;·&nbsp; <span style="color:#777;">' + sipDurationNote + '</span>'
@@ -1042,27 +1033,15 @@ function renderGoals() {
     tr.innerHTML = `
       <td><input type="text" value="${g.name}" placeholder="Goal name" oninput="goals[${i}].name=this.value;renderGoals();saveData();" onclick="this.select();" style="min-width:90px;"></td>
       <td>
-        <input type="number" value="${g.amount}" min="10000" step="100000" onclick="this.select();"
+        <input type="number" value="${g.amount}" min="10000" step="any" onclick="this.select();"
           oninput="goals[${i}].amount=+this.value||0;this.nextElementSibling.textContent=fmtCr(+this.value||0);renderGoals();update();saveData();">
         <div style="font-size:10px;color:#185fa5;font-weight:600;margin-top:2px;">${fmtCr(g.amount||0)}</div>
       </td>
-      <td>
-        <input type="number" value="${g.currentInvestment||0}" min="0" step="10000" onclick="this.select();"
-          title="Existing savings set aside for this goal"
-          oninput="goals[${i}].currentInvestment=+this.value||0;this.nextElementSibling.textContent=(+this.value>0?fmtCr(+this.value):'');renderGoals();update();saveData();" style="width:76px;">
-        <div style="font-size:10px;color:#185fa5;font-weight:600;margin-top:2px;">${(g.currentInvestment||0)>0?fmtCr(g.currentInvestment||0):''}</div>
-      </td>
-      <td class="r"><input type="number" value="${g.years}" min="1" max="40" step="1" onclick="this.select();" oninput="goals[${i}].years=+this.value||1;renderGoals();update();saveData();" style="width:50px;"></td>
-      <td class="r" style="color:#5f5e5a;font-weight:500;">${goalAge}</td>
-      <td class="r"><input type="number" value="${g.ret}" min="4" max="20" step="0.5" onclick="this.select();" oninput="goals[${i}].ret=+this.value||8;renderGoals();update();saveData();" style="width:48px;"></td>
-      <td class="r" style="color:#5f5e5a;">${fmtCr(infAdjTarget)}</td>
-      <td style="text-align:center;">
-        <input type="checkbox" ${fromCorpus?'checked':''} title="Tick = corpus withdrawal. Untick = dedicated SIP." onchange="goals[${i}].fromCorpus=this.checked;renderGoals();update();saveData();">
-      </td>
+      
       <td style="text-align:center;">
         <input type="checkbox" ${inflAdj?'checked':''} title="Tick if amount is today price and needs inflation adjustment." onchange="goals[${i}].inflAdj=this.checked;renderGoals();update();saveData();">
       </td>
-      <td class="r">${corpusTag}</td>
+      <td style="text-align:center;">${sipTag}</td>
       <td style="text-align:center;"><button onclick="deleteGoal(${g.id})" title="Remove this goal"
         style="background:#fcebeb;border:1px solid #f5c6c6;color:#c0392b;border-radius:5px;padding:3px 8px;font-size:12px;cursor:pointer;font-family:inherit;transition:background 0.12s;"
         onmouseover="this.style.background='#e24b4a';this.style.color='#fff';"
@@ -1081,18 +1060,14 @@ function renderGoals() {
   const carGoal = goals.find(g => g.name.toLowerCase().includes('car'));
   if (carGoal) notes.push('<strong>Car purchase:</strong> Consider a recurring deposit (RD) or short-term debt fund for a 5-year car goal — smoother returns and capital protection suit this timeline. Avoid pure equity for goals under 5 years.');
   const mainSIP = Math.round((+document.getElementById('annualInvestment').value||0)/12).toLocaleString('en-IN');
-  const fromCorpusCount = goals.filter(g => g.fromCorpus !== false).length;
-  const viaOwnSIP       = goals.filter(g => g.fromCorpus === false).length;
-  if (fromCorpusCount > 0)
-    notes.push('✅ <strong>' + fromCorpusCount + ' goal' + (fromCorpusCount>1?'s are':' is') + ' funded from retirement corpus</strong> — at the goal age, the lump sum is deducted from your corpus in the year-by-year projection. Your B1/B2/B3 SIP must be large enough to cover retirement <em>plus</em> these goal amounts.');
-  if (viaOwnSIP > 0)
-    notes.push('🎯 <strong>' + viaOwnSIP + ' goal' + (viaOwnSIP>1?'s need':' needs') + ' a dedicated SIP</strong> — each gets its own separate mutual fund, invested alongside (not inside) your B1/B2/B3 retirement SIPs. See <strong>Section 4 — SIP Planner</strong> for the complete breakdown: your total ₹' + mainSIP + '/month is split between retirement buckets and these goal funds.');
+  if (goals.length > 0)
+    notes.push('🎯 <strong>' + goals.length + ' goal' + (goals.length>1?'s have':'has') + ' a dedicated SIP</strong> — each goal gets its own separate mutual fund, invested alongside (not inside) your B1/B2/B3 retirement buckets. Your total ₹' + mainSIP + '/month is split between retirement buckets and these goal funds in the <strong>SIP Planner</strong> above.');
   document.getElementById('goalsNote').innerHTML = notes.map(n => `<div class="banner" style="margin-bottom:6px;font-size:12px;">${n}</div>`).join('');
 
   // SIP split summary — only non-corpus goals have dedicated SIPs
   const totalMonthly = Math.round((+document.getElementById('annualInvestment').value||0)/12);
   let totalGoalSIP = 0;
-  goals.filter(g => g.fromCorpus === false).forEach((g) => {
+  goals.forEach((g) => {
     const sipYrs2 = Math.min(g.years||1, n1);
     if (sipYrs2 <= 0) return;
     const infT2  = g.inflAdj ? (g.amount||0)*Math.pow(1+inflRate,g.years||1) : (g.amount||0);
@@ -1120,6 +1095,48 @@ function renderGoals() {
       + (totalGoalSIP > totalMonthly ? '<div style="font-size:11px;color:#c0392b;font-weight:600;">⚠️ Goal SIPs exceed total investment — increase investment or reduce goals.</div>' : '')
       + '</div>';
     } else { sipSumEl.style.display = 'none'; }
+
+  // ── Goal SIP cards in SIP Planner ─────────────────────────────────────────
+  const goalCardsWrap  = document.getElementById('goal-sip-cards');
+  const goalCardsInner = document.getElementById('goal-sip-cards-inner');
+  if (goalCardsWrap && goalCardsInner) {
+    const inp2 = getInputs();
+    const n1g  = Math.max(0, inp2.retirementAge - inp2.currentAge);
+    const inflR = inp2.inflation;
+    const activeSIPs = goals.filter(g => {
+      const sipYrs = Math.min(g.years||1, n1g);
+      const postR  = Math.max(0,(g.years||1)-n1g);
+      const futTgt = g.inflAdj ? (g.amount||0)*Math.pow(1+inflR,g.years||1) : (g.amount||0);
+      const fvEx   = (g.currentInvestment||0)*Math.pow(1+(g.ret||10)/100,g.years||1);
+      const need   = Math.max(0, futTgt - fvEx);
+      const adjTgt = (postR>0&&sipYrs>0) ? need/Math.pow(1+(g.ret||10)/100,postR) : need;
+      return sipYrs>0 && goalSIP(adjTgt, sipYrs, g.ret||10) > 0;
+    });
+    if (activeSIPs.length > 0) {
+      goalCardsWrap.style.display = '';
+      goalCardsInner.innerHTML = activeSIPs.map(g => {
+        const sipYrs = Math.min(g.years||1, n1g);
+        const postR  = Math.max(0,(g.years||1)-n1g);
+        const futTgt = g.inflAdj ? (g.amount||0)*Math.pow(1+inflR,g.years||1) : (g.amount||0);
+        const fvEx   = (g.currentInvestment||0)*Math.pow(1+(g.ret||10)/100,g.years||1);
+        const need   = Math.max(0, futTgt - fvEx);
+        const adjTgt = (postR>0&&sipYrs>0) ? need/Math.pow(1+(g.ret||10)/100,postR) : need;
+        const mSIP   = goalSIP(adjTgt, sipYrs, g.ret||10);
+        const pct    = futTgt>0 ? Math.min(100,Math.round(fvEx/futTgt*100)) : 0;
+        const pcol   = pct>=80?'#1a6e35':pct>=40?'#c47d00':'#c0392b';
+        const stopAge= (inp2.currentAge||34)+sipYrs;
+        return '<div style="background:#fff;border:1px solid #f0c040;border-radius:8px;padding:10px 12px;min-width:160px;flex:1 1 160px;">'
+          + '<div style="font-size:10px;font-weight:700;color:#8b6914;margin-bottom:4px;">🎯 '+(g.name||'Goal')+'</div>'
+          + '<div style="font-size:18px;font-weight:800;color:#185fa5;">₹'+Math.round(mSIP).toLocaleString('en-IN')+'/mo</div>'
+          + '<div style="font-size:9px;color:#777;margin-top:2px;">SIP for '+sipYrs+' yr'+(sipYrs!==1?'s':'')+' · stops at age '+stopAge+(postR>0?' → fund grows '+postR+' more yr'+(postR!==1?'s':''):'')+'</div>'
+          + '<div style="font-size:9px;color:#555;margin-top:3px;">Target: '+fmtCr(Math.round(futTgt))+'</div>'
+          + (fvEx>1000?'<div style="font-size:9px;color:'+pcol+';font-weight:600;">Existing covers '+pct+'%</div>':'')
+          + '</div>';
+      }).join('');
+    } else {
+      goalCardsWrap.style.display = 'none';
+    }
+  }
   }
 }
 
@@ -1147,8 +1164,8 @@ function renderRE() {
     const tr = document.createElement('tr');
     tr.innerHTML = `
       <td><input type="text" value="${r.name}" placeholder="e.g. House" oninput="reAssets[${i}].name=this.value;saveData();" style="min-width:90px;"></td>
-      <td><input type="number" value="${r.value}" min="0" step="100000" oninput="reAssets[${i}].value=+this.value||0;renderRE();updateNW();saveData();"></td>
-      <td class="r"><input type="number" value="${r.growth}" min="1" max="25" step="0.5" oninput="reAssets[${i}].growth=+this.value||8;renderRE();updateNW();saveData();" style="width:55px;"> %</td>
+      <td><input type="number" value="${r.value}" min="0" step="any" oninput="reAssets[${i}].value=+this.value||0;renderRE();updateNW();saveData();"></td>
+      <td class="r"><input type="number" value="${r.growth}" min="1" max="25" step="any" oninput="reAssets[${i}].growth=+this.value||8;renderRE();updateNW();saveData();" style="width:55px;"> %</td>
       <td class="r" style="color:#5f5e5a;">${fmtCr(atRet)}</td>
       <td><button class="del-btn" onclick="deleteRE(${r.id})">×</button></td>`;
     tbody.appendChild(tr);
@@ -1332,8 +1349,7 @@ function calculate(inp) {
   // Includes ALL non-corpus goals (pre- AND post-retirement).
   // SIP always stops at retirement (min of goal year and n1).
   // For post-retirement goals: SIP runs for n1 years, then fund grows on its own until goal year.
-  const nonCorpusGoals = (typeof goals !== 'undefined' ? goals : [])
-    .filter(g => g.fromCorpus === false);
+  const nonCorpusGoals = (typeof goals !== 'undefined' ? goals : []);
 
   const goalTrackers = nonCorpusGoals.map(g => {
     const gYears   = g.years || 1;
@@ -1404,10 +1420,8 @@ function calculate(inp) {
   let totalInvested    = investablePortfolio; annInv = retirementAnnInv;
   for (let y=0; y<n1; y++) { totalInvested += annInv; annInv *= (1+inp.investGrowth); }
 
-  // Helper: corpus withdrawal for a goal at year Y from now
-  const corpusGoalOut = (yearsFromNow) => goals
-    .filter(g => +g.years === yearsFromNow && g.fromCorpus !== false)
-    .reduce((s, g) => s + goalWithdrawalAmount(g, inp.inflation), 0);
+  // No corpus withdrawals — all goals funded via dedicated SIP
+  const corpusGoalOut = (_yearsFromNow) => 0;
 
   // Accumulation rows — use retirementAnnInv (goals invest separately in their own funds)
   const accRows = [];
@@ -1418,17 +1432,21 @@ function calculate(inp) {
 
     // Snapshot each goal fund for this row
     const goalFunds = goalTrackers.map(gt => {
-      if (gt.done) return { name:gt.name, sip:0, fund:0, outflow:0, achieved:false, sipDone:false, fundAtRet:0 };
+      if (gt.done) return { name:gt.name, sip:0, fund:0, outflow:0, achieved:false, sipDone:false, fundAtRet:0, fundAtGoal:0, postRetYrs:0 };
       const isGoalYear = y === gt.goalYear && !gt.isPostRet;  // pre-retirement goal achieved
       const isSIPEnd   = y === gt.sipYear  && gt.isPostRet;   // post-retirement: SIP stops at retirement
+      // For post-ret goals: project fund from retirement to actual goal year
+      const fundAtGoal = isSIPEnd ? Math.round(gt.fund * Math.pow(1 + gt.retRate, gt.postRetYrs)) : 0;
       return {
-        name:      gt.name,
-        sip:       (isGoalYear || isSIPEnd) ? 0 : gt.prevSIP,
-        fund:      gt.fund,
-        outflow:   isGoalYear ? gt.fund : 0,
-        achieved:  isGoalYear,
-        sipDone:   isSIPEnd,    // SIP stops but fund continues growing post-retirement
-        fundAtRet: isSIPEnd ? gt.fund : 0
+        name:       gt.name,
+        sip:        (isGoalYear || isSIPEnd) ? 0 : gt.prevSIP,
+        fund:       gt.fund,
+        outflow:    isGoalYear ? gt.fund : 0,
+        achieved:   isGoalYear,
+        sipDone:    isSIPEnd,    // SIP stops but fund continues growing post-retirement
+        fundAtRet:  isSIPEnd ? gt.fund : 0,
+        fundAtGoal: fundAtGoal,  // projected value at actual goal date (post-retirement only)
+        postRetYrs: gt.postRetYrs
       };
     });
 
@@ -1939,7 +1957,9 @@ function buildTable(accRows, depRows, retirementAge) {
       if (gf.achieved) {
         goalCell += '<div style="font-size:10px;color:#1a6e35;font-weight:600;">✅ ' + gf.name + ' goal met! ' + fmtCr(gf.outflow) + '</div>';
       } else if (gf.sipDone) {
-        goalCell += '<div style="font-size:10px;color:#185fa5;">🏁 ' + gf.name + ' SIP done · fund: ' + fmtCr(gf.fundAtRet) + '</div>';
+        goalCell += '<div style="font-size:10px;color:#185fa5;">🏁 ' + gf.name + ' SIP done</div>'
+          + '<div style="font-size:9px;color:#555;">&nbsp;&nbsp;Fund now: ' + fmtCr(gf.fundAtRet) + '</div>'
+          + (gf.fundAtGoal > 0 ? '<div style="font-size:9px;color:#1a6e35;font-weight:600;">&nbsp;&nbsp;→ At goal date (+' + gf.postRetYrs + 'yr): ' + fmtCr(gf.fundAtGoal) + '</div>' : '');
       } else if (gf.sip > 0) {
         goalCell += '<div style="font-size:10px;color:#8b6914;">🎯 ' + gf.name + ': +' + fmtCr(gf.sip) + '/yr · fund ' + fmtCr(gf.fund) + '</div>';
       }
@@ -2138,11 +2158,11 @@ function saveData() {
       portB3Rate:       document.getElementById('portB3Rate').value,
     }
   };
-  try { localStorage.setItem('finplan_v4', JSON.stringify(d)); } catch(e){}
+  try { localStorage.setItem('finplan_v5', JSON.stringify(d)); } catch(e){}
 }
 
 function loadData() {
-  let d; try { d = JSON.parse(localStorage.getItem('finplan_v4')); } catch(e){ return false; }
+  let d; try { d = JSON.parse(localStorage.getItem('finplan_v5')); } catch(e){ return false; }
   if (!d) { var b=document.getElementById("freshStartBanner"); if(b) b.style.display=""; return false; }
   if (d.expRows  && d.expRows.length  > 0) expRows  = d.expRows;
   if (Array.isArray(d.goals))              goals    = d.goals;
@@ -2157,7 +2177,7 @@ function loadData() {
 
 function exportData() {
   try {
-    var raw = localStorage.getItem('finplan_v4');
+    var raw = localStorage.getItem('finplan_v5');
     if (!raw) { alert('No saved data yet — use the planner first, then export.'); return; }
     var blob = new Blob([raw], { type: 'application/json' });
     var a = document.createElement('a');
@@ -2175,7 +2195,7 @@ function importData(input) {
     try {
       var parsed = JSON.parse(e.target.result);
       if (!parsed || typeof parsed !== 'object') throw new Error('Invalid file');
-      localStorage.setItem('finplan_v4', JSON.stringify(parsed));
+      localStorage.setItem('finplan_v5', JSON.stringify(parsed));
       alert('Data imported! Reloading…'); location.reload();
     } catch(err) { alert('Import failed: ' + err.message); }
   };
@@ -2185,7 +2205,7 @@ function importData(input) {
 
 function resetData() {
   if (!confirm('This will clear all your saved data and reset to defaults. Use this before sharing the file with someone else. Continue?')) return;
-  try { localStorage.removeItem('finplan_v4'); } catch(e){}
+  try { localStorage.removeItem('finplan_v5'); } catch(e){}
   location.reload();
 }
 
@@ -2435,7 +2455,7 @@ function renderAllocSection() {
   // ── External goal SIPs — match renderGoals() / calculate() logic exactly ──
   const inflRate2 = +document.getElementById('inflation').value / 100;
   const externalGoals = (typeof goals !== 'undefined' ? goals : [])
-    .filter(g => g.fromCorpus === false)
+
     .map(g => {
       // Match inflAdj logic in calculate() and renderGoals()
       const infAdj     = g.inflAdj
@@ -2626,7 +2646,7 @@ function renderAllocSection() {
       ? `✅ <strong>Retirement buckets are fully funded.</strong>
          Extra ${fmtCr(Math.round(-sipGap))}/month (after goals) can go to <strong>B3 Equity</strong> for extra long-term growth.`
       : `⚠️ <strong>Retirement needs ${fmtCr(Math.round(sipGap))}/month more</strong> after goal SIPs are deducted.
-         Consider increasing your total SIP, extending retirement by 1–2 years, or marking some goals as "From corpus."`
+         Consider increasing your total SIP, extending retirement by 1–2 years, or reducing goal SIP amounts.`
     }<br>
     <span style="color:#666;font-size:11px;">
       Total SIP: <strong>${fmtCr(totalMonthlySIP)}/mo</strong>
