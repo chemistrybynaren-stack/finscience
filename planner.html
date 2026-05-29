@@ -397,18 +397,17 @@ details.acc-panel .acc-body { padding:1.25rem 1.5rem 1.5rem; }
   <div style="overflow-x:auto;">
   <table class="etable" id="goalsTable">
     <thead><tr>
-      <th style="width:13%">Goal name</th>
-      <th class="r" style="width:10%">Amount today (₹)</th>
-      <th class="r" style="width:9%" title="Existing savings already set aside for this goal (current value). Grows at the goal return % — reduces SIP needed.">Existing ₹<br><span style="font-size:9px;font-weight:400;color:#aaa;">set aside already</span></th>
-      <th class="r" style="width:5%">Years</th>
-      <th class="r" style="width:5%">Age</th>
-      <th class="r" style="width:6%">Return %</th>
-      <th class="r" style="width:11%">Future Target</th>
-      <th class="r" style="width:12%" title="Monthly SIP. For non-corpus goals: this is deducted from your annual investment. For corpus goals: funded by retirement corpus withdrawal at goal age.">SIP / Funding<br><span style="font-size:9px;font-weight:400;color:#aaa;">see below ↓</span></th>
-      <th style="width:6%" title="Tick = paid from retirement corpus at goal age. Untick = dedicated SIP runs alongside retirement SIP, deducted from your annual investment.">From corpus?</th>
-      <th style="width:6%" title="Tick if amount is in today's rupees and needs inflation adjustment.">Inflate amt?</th>
-      <th class="r" style="width:10%">Corpus withdrawal</th>
-      <th style="width:4%;text-align:center;color:#c0392b;font-size:10px;">Remove</th>
+      <th style="width:16%">Goal name</th>
+      <th class="r" style="width:13%">Amount today (₹)</th>
+      <th class="r" style="width:11%" title="Existing savings already set aside for this goal. Grows at the goal return % — reduces SIP needed.">Existing ₹<br><span style="font-size:9px;font-weight:400;color:#aaa;">set aside already</span></th>
+      <th class="r" style="width:7%">Years</th>
+      <th class="r" style="width:6%">Age</th>
+      <th class="r" style="width:8%">Return %</th>
+      <th class="r" style="width:13%">Future Target</th>
+      <th style="width:8%" title="Tick = paid from retirement corpus at goal age. Untick = dedicated SIP deducted from your annual investment.">From corpus?</th>
+      <th style="width:8%" title="Tick if amount is today's price and needs inflation adjustment.">Inflate amt?</th>
+      <th class="r" style="width:13%">Corpus withdrawal</th>
+      <th style="width:5%;text-align:center;color:#c0392b;font-size:10px;">Remove</th>
     </tr></thead>
     <tbody id="goalsBody"></tbody>
   </table>
@@ -1023,21 +1022,45 @@ function renderGoals() {
       ? `<span style="font-weight:500;color:#a32d2d;">${fmtCr(corpusAmt)}</span><div style="font-size:9px;color:#888780;">at age ${goalAge}</div>`
       : `<span style="color:#b4b2a9;font-size:12px;">via SIP only</span>`;
 
+    // Build SIP info for the sub-row
+    let sipInfo;
+    if (!isNonCorpus) {
+      sipInfo = '<span style="color:#8b6914;font-weight:700;">🏦 Funded from retirement corpus</span>'
+        + ' — ₹' + fmtCr(corpusAmt) + ' withdrawn at age ' + goalAge
+        + (fvExisting > 1000 ? ' &nbsp;·&nbsp; <span style="color:#1a6e35;">existing savings → ' + fmtCr(Math.round(fvExisting)) + ' by goal date</span>' : '');
+    } else if (sip > 0) {
+      sipInfo = '<span style="color:#185fa5;font-weight:700;">📈 Dedicated SIP: ₹' + Math.round(sip).toLocaleString('en-IN') + '/mo</span>'
+        + ' &nbsp;(₹' + Math.round(sip*12).toLocaleString('en-IN') + '/yr)'
+        + ' &nbsp;·&nbsp; <span style="color:#777;">' + sipDurationNote + '</span>'
+        + ' &nbsp;·&nbsp; <span style="color:#c47d00;">⬇ deducted from your annual investment</span>'
+        + (fvExisting > 1000 ? ' &nbsp;·&nbsp; <span style="color:#1a6e35;">existing → ' + fmtCr(Math.round(fvExisting)) + '</span>' : '');
+    } else {
+      sipInfo = '<span style="color:#1a6e35;font-weight:700;">✅ Fully covered by existing savings</span>';
+    }
+
     const tr = document.createElement('tr');
     tr.innerHTML = `
-      <td><input type="text" value="${g.name}" placeholder="Goal name" oninput="goals[${i}].name=this.value;renderGoals();saveData();" style="min-width:90px;"></td>
-      <td><input type="number" value="${g.amount}" min="10000" step="100000" oninput="goals[${i}].amount=+this.value||0;renderGoals();update();saveData();"></td>
-      <td><input type="number" value="${g.currentInvestment||0}" min="0" step="10000" title="Current savings already set aside for this goal" oninput="goals[${i}].currentInvestment=+this.value||0;renderGoals();update();saveData();" style="width:76px;"></td>
-      <td class="r"><input type="number" value="${g.years}" min="1" max="40" step="1" oninput="goals[${i}].years=+this.value||1;renderGoals();update();saveData();" style="width:50px;"></td>
+      <td><input type="text" value="${g.name}" placeholder="Goal name" oninput="goals[${i}].name=this.value;renderGoals();saveData();" onclick="this.select();" style="min-width:90px;"></td>
+      <td>
+        <input type="number" value="${g.amount}" min="10000" step="100000" onclick="this.select();"
+          oninput="goals[${i}].amount=+this.value||0;this.nextElementSibling.textContent=fmtCr(+this.value||0);renderGoals();update();saveData();">
+        <div style="font-size:10px;color:#185fa5;font-weight:600;margin-top:2px;">${fmtCr(g.amount||0)}</div>
+      </td>
+      <td>
+        <input type="number" value="${g.currentInvestment||0}" min="0" step="10000" onclick="this.select();"
+          title="Existing savings set aside for this goal"
+          oninput="goals[${i}].currentInvestment=+this.value||0;this.nextElementSibling.textContent=(+this.value>0?fmtCr(+this.value):'');renderGoals();update();saveData();" style="width:76px;">
+        <div style="font-size:10px;color:#185fa5;font-weight:600;margin-top:2px;">${(g.currentInvestment||0)>0?fmtCr(g.currentInvestment||0):''}</div>
+      </td>
+      <td class="r"><input type="number" value="${g.years}" min="1" max="40" step="1" onclick="this.select();" oninput="goals[${i}].years=+this.value||1;renderGoals();update();saveData();" style="width:50px;"></td>
       <td class="r" style="color:#5f5e5a;font-weight:500;">${goalAge}</td>
-      <td class="r"><input type="number" value="${g.ret}" min="4" max="20" step="0.5" oninput="goals[${i}].ret=+this.value||8;renderGoals();update();saveData();" style="width:48px;"></td>
+      <td class="r"><input type="number" value="${g.ret}" min="4" max="20" step="0.5" onclick="this.select();" oninput="goals[${i}].ret=+this.value||8;renderGoals();update();saveData();" style="width:48px;"></td>
       <td class="r" style="color:#5f5e5a;">${fmtCr(infAdjTarget)}</td>
-      <td class="r">${sipTag}<div style="font-size:9px;color:#b4b2a9;">₹${Math.round(sip*12).toLocaleString('en-IN')}/yr</div></td>
       <td style="text-align:center;">
-        <input type="checkbox" ${fromCorpus?'checked':''} title="Deduct from liquid corpus at goal age" onchange="goals[${i}].fromCorpus=this.checked;renderGoals();update();saveData();">
+        <input type="checkbox" ${fromCorpus?'checked':''} title="Tick = corpus withdrawal. Untick = dedicated SIP." onchange="goals[${i}].fromCorpus=this.checked;renderGoals();update();saveData();">
       </td>
       <td style="text-align:center;">
-        <input type="checkbox" ${inflAdj?'checked':''} title="Inflate the amount entered to future value (tick for car/purchases; untick if amount is already the future expected cost)" onchange="goals[${i}].inflAdj=this.checked;renderGoals();update();saveData();">
+        <input type="checkbox" ${inflAdj?'checked':''} title="Tick if amount is today price and needs inflation adjustment." onchange="goals[${i}].inflAdj=this.checked;renderGoals();update();saveData();">
       </td>
       <td class="r">${corpusTag}</td>
       <td style="text-align:center;"><button onclick="deleteGoal(${g.id})" title="Remove this goal"
@@ -1045,6 +1068,11 @@ function renderGoals() {
         onmouseover="this.style.background='#e24b4a';this.style.color='#fff';"
         onmouseout="this.style.background='#fcebeb';this.style.color='#c0392b';">🗑 Del</button></td>`;
     tbody.appendChild(tr);
+
+    // Sub-row: SIP / funding info below each goal
+    const trSub = document.createElement('tr');
+    trSub.innerHTML = `<td colspan="11" style="padding:5px 12px 10px;background:#fafaf7;border-bottom:2px solid #e8e5e0;font-size:11px;color:#555;">${sipInfo}</td>`;
+    tbody.appendChild(trSub);
   });
 
   // Notes
@@ -1085,9 +1113,9 @@ function renderGoals() {
       + '<div style="display:flex;gap:20px;flex-wrap:wrap;align-items:flex-end;">'
       + '<div style="text-align:center;"><div style="font-size:18px;font-weight:800;color:#185fa5;">₹' + totalMonthly.toLocaleString('en-IN') + '</div><div style="font-size:10px;color:#888;">Total monthly SIP</div></div>'
       + '<div style="font-size:18px;color:#ccc;">＝</div>'
-      + '<div style="text-align:center;"><div style="font-size:18px;font-weight:800;color:#c47d00;">₹' + totalGoalSIP.toLocaleString('en-IN') + '</div><div style="font-size:10px;color:#888;">Goal SIPs (dedicated)</div></div>'
+      + '<div style="text-align:center;"><div style="font-size:18px;font-weight:800;color:#c47d00;">₹' + totalGoalSIP.toLocaleString('en-IN') + '</div><div style="font-size:10px;color:#888;">→ Separate goal funds</div><div style="font-size:9px;color:#aaa;">(own MF, not in corpus)</div></div>'
       + '<div style="font-size:18px;color:#ccc;">＋</div>'
-      + '<div style="text-align:center;"><div style="font-size:18px;font-weight:800;color:#1a6e35;">₹' + retireSIP2.toLocaleString('en-IN') + '</div><div style="font-size:10px;color:#888;">Retirement SIP</div></div>'
+      + '<div style="text-align:center;"><div style="font-size:18px;font-weight:800;color:#1a6e35;">₹' + retireSIP2.toLocaleString('en-IN') + '</div><div style="font-size:10px;color:#888;">→ Retirement corpus</div><div style="font-size:9px;color:#aaa;">(B1+B2+B3 buckets)</div></div>'
       + '</div>'
       + (totalGoalSIP > totalMonthly ? '<div style="font-size:11px;color:#c0392b;font-weight:600;">⚠️ Goal SIPs exceed total investment — increase investment or reduce goals.</div>' : '')
       + '</div>';
@@ -1880,24 +1908,16 @@ function buildScenarios(inp) {
 function buildTable(accRows, depRows, retirementAge) {
   const tbody = document.getElementById('projBody'); tbody.innerHTML='';
 
-  // ── Detect goal columns from accumulation rows ──────────────────────────
-  const goalCols = (accRows[0] && accRows[0].goalFunds) ? accRows[0].goalFunds : [];
-
-  // ── Rebuild thead dynamically to include goal columns ───────────────────
+  // ── Rebuild thead — no extra goal columns ────────────────────────────────
   const thead = document.getElementById('projHead');
   if (thead) {
-    const goalHeaders = goalCols.map(g =>
-      `<th style="text-align:right;background:#fffbf0;color:#8b6914;border-left:2px dashed #f0c040;min-width:120px;">
-        🎯 ${g.name}<div style="font-size:9px;font-weight:400;color:#aaa;">SIP this yr · Fund value</div>
-      </th>`
-    ).join('');
     thead.innerHTML = `<tr>
-      <th>Year</th><th style="text-align:right;">Age</th>
-      <th style="text-align:right;">Annual investment</th>
-      <th style="text-align:right;">Total Wealth<br><span style="font-size:9px;font-weight:400;color:#aaa;">Retirement + Goal funds</span></th>
+      <th>Year</th>
+      <th style="text-align:right;">Age</th>
+      <th style="text-align:right;">Annual investment<br><span style="font-size:9px;font-weight:400;color:#aaa;">retirement + goal SIPs</span></th>
+      <th style="text-align:right;">Total Wealth<br><span style="font-size:9px;font-weight:400;color:#aaa;">retirement corpus + goal funds</span></th>
       <th style="text-align:right;">Annual expense</th>
-      <th style="text-align:right;">Goal outflows (corpus)</th>
-      ${goalHeaders}
+      <th style="text-align:right;">Goal outflows &amp; funds</th>
       <th style="text-align:right;">Status</th>
     </tr>`;
   }
@@ -1907,32 +1927,24 @@ function buildTable(accRows, depRows, retirementAge) {
     const tr = document.createElement('tr');
     if (r.age === retirementAge) tr.className = 'ret-row';
 
-    // ── Build goal fund cells ─────────────────────────────────────────────
+    // ── Goal outflows + dedicated goal fund SIPs — folded into one cell ──────
     const gfs = r.goalFunds || [];
-    // Pad with empty cells if this row has fewer goal entries (e.g. depletion rows)
-    const goalCells = goalCols.map((col, i) => {
-      const gf = gfs[i];
-      if (!gf || isRet) {
-        return `<td style="text-align:right;border-left:2px dashed #f0e8c0;color:#ccc;">—</td>`;
-      }
-      // Post-retirement goal: SIP completed, fund now growing on its own until goal year
-      if (gf.sipDone) {
-        return `<td style="text-align:right;border-left:2px dashed #f0e8c0;background:#f0f8ff;">
-          <span style="font-size:11px;font-weight:700;color:#185fa5;">🏁 SIP done</span><br>
-          <span style="font-size:10px;color:#555;">Fund: ${fmtCr(gf.fundAtRet)}</span><br>
-          <span style="font-size:9px;color:#888;">grows after retirement</span>
-        </td>`;
-      }
+    let goalCell = '';
+    // Corpus goal outflows (withdrawn from retirement fund)
+    if (r.goalOut > 0) {
+      goalCell += '<span class="tag tag-amber">−' + fmtCr(r.goalOut) + ' corpus</span>';
+    }
+    // Dedicated goal fund SIPs (separate funds, not from corpus)
+    gfs.forEach(gf => {
       if (gf.achieved) {
-        return `<td style="text-align:right;border-left:2px dashed #f0e8c0;background:#f0faf4;">
-          <span style="color:#1a6e35;font-weight:700;font-size:12px;">✅ Goal met!</span><br>
-          <span style="font-size:10px;color:#1a6e35;">${fmtCr(gf.outflow)}</span>
-        </td>`;
+        goalCell += '<div style="font-size:10px;color:#1a6e35;font-weight:600;">✅ ' + gf.name + ' goal met! ' + fmtCr(gf.outflow) + '</div>';
+      } else if (gf.sipDone) {
+        goalCell += '<div style="font-size:10px;color:#185fa5;">🏁 ' + gf.name + ' SIP done · fund: ' + fmtCr(gf.fundAtRet) + '</div>';
+      } else if (gf.sip > 0) {
+        goalCell += '<div style="font-size:10px;color:#8b6914;">🎯 ' + gf.name + ': +' + fmtCr(gf.sip) + '/yr · fund ' + fmtCr(gf.fund) + '</div>';
       }
-      const sipLine  = gf.sip  > 0 ? `<span style="color:#8b6914;font-size:11px;font-weight:600;">+${fmtCr(gf.sip)}/yr</span>` : '—';
-      const fundLine = gf.fund > 0 ? `<div style="font-size:11px;color:#555;">${fmtCr(gf.fund)}</div>` : '';
-      return `<td style="text-align:right;border-left:2px dashed #f0e8c0;">${sipLine}${fundLine}</td>`;
-    }).join('');
+    });
+    if (!goalCell) goalCell = '—';
 
     tr.innerHTML=`<td>${r.year}</td>
       <td>${r.age}${r.age===retirementAge?' ★':''}</td>
@@ -1941,11 +1953,10 @@ function buildTable(accRows, depRows, retirementAge) {
         const gfSum=(r.goalFunds||[]).reduce((s,gf)=>s+(gf.fund&&!gf.achieved?gf.fund:0),0);
         const total=r.portfolio+gfSum;
         if(r.portfolio<=0&&gfSum===0) return '<span class="tag tag-red">Depleted</span>';
-        return fmtCr(total)+(gfSum>0?'<div style="font-size:9px;color:#888;font-weight:400;">🏦 '+fmtCr(r.portfolio)+' retire &nbsp;🎯 '+fmtCr(gfSum)+' goals</div>':'');
+        return fmtCr(total)+(gfSum>0?'<div style="font-size:9px;color:#888;font-weight:400;">🏦 '+fmtCr(r.portfolio)+' retirement &nbsp;🎯 '+fmtCr(gfSum)+' goal funds</div>':'');
       })()}</td>
       <td>${r.annualExpense>0?fmtCr(r.annualExpense):'—'}</td>
-      <td>${r.goalOut>0?'<span class="tag tag-amber">'+fmtCr(r.goalOut)+'</span>':'—'}</td>
-      ${goalCells}
+      <td style="text-align:right;">${goalCell}</td>
       <td><span class="tag ${isRet?'tag-green':'tag-blue'}">${isRet?'Retired':'Accumulating'}</span></td>`;
     tbody.appendChild(tr);
   });
