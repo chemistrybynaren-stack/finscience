@@ -2281,7 +2281,7 @@ function update() {
   document.getElementById('m-survival').textContent      = `to sustain till age ${inp.lifeExpectancy}`;
   document.getElementById('m-futureExpense').textContent = fmtCr(res.futureMonthlyExpense);
   const sc = document.getElementById('m-surplus-card');
-  sc.className = 'metric-card ' + (res.surplusDeficit>=0?'mc-success':'mc-danger') + '" style="padding:10px 12px;';
+  sc.className = 'metric-card ' + (res.surplusDeficit>=0?'mc-success':'mc-danger');
   document.getElementById('m-surplus').textContent    = fmtCr(Math.abs(res.surplusDeficit));
   document.getElementById('m-surplusNote').textContent = res.surplusDeficit>=0?'surplus after emergency fund':'shortfall — action needed';
   document.getElementById('m-emergency').textContent     = fmtCr(res.emergencyFund);
