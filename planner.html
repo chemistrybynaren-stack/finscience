@@ -1461,7 +1461,10 @@ function calculate(inp) {
       const isSIPEnd   = y === gt.sipYear  && gt.isPostRet;   // post-retirement: SIP stops at retirement
       // For post-ret goals: project fund from retirement to actual goal year
       const fundAtGoal = isSIPEnd ? Math.round(gt.fund * Math.pow(1 + gt.retRate, gt.postRetYrs)) : 0;
-      if (isSIPEnd) gt.savedFundAtGoal = fundAtGoal;  // save for depletion rows
+      if (isSIPEnd) {
+        gt.savedFundAtGoal   = fundAtGoal;    // projected value at actual goal date
+        gt.fundAtRetirement  = gt.fund;       // actual fund value AT retirement (before growth)
+      }
       return {
         name:       gt.name,
         sip:        (isGoalYear || isSIPEnd) ? 0 : gt.prevSIP,
@@ -1502,21 +1505,34 @@ function calculate(inp) {
     const ageExpMonthly = getMonthlyExpenseAtAge(age);
     const annExp  = ageExpMonthly * 12 * Math.pow(1+inp.inflation, n1+y);
     const goalOut = corpusGoalOut(n1 + y);
-    // Post-retirement goals that mature this year — show in Goal outflows & funds column
+    // Post-retirement goal funds — track year-by-year until withdrawal
     const depGoalFunds = goalTrackers
-      .filter(gt => gt.isPostRet && gt.goalYear === n1 + y)
-      .map(gt => ({
-        name:        gt.name,
-        sip:         0,
-        fund:        gt.savedFundAtGoal || 0,
-        outflow:     gt.savedFundAtGoal || 0,
-        achieved:    true,
-        sipDone:     false,
-        fundAtRet:   0,
-        fundAtGoal:  gt.savedFundAtGoal || 0,
-        futureTarget: gt.futureTarget,
-        postRetYrs:  gt.postRetYrs
-      }));
+      .filter(gt => gt.isPostRet)
+      .map(gt => {
+        const yrsFromRet  = y;
+        const yrsToGoal   = gt.postRetYrs;
+        const isGoalNow   = (gt.goalYear === n1 + y);       // goal matures this year
+        const alreadyDone = (yrsFromRet > yrsToGoal);       // past goal year
+
+        if (alreadyDone) return null;   // fund already withdrawn, skip
+
+        // Current fund value: grows from fundAtRetirement at goal rate
+        const currentFund = Math.round((gt.fundAtRetirement || 0) * Math.pow(1 + gt.retRate, yrsFromRet));
+
+        return {
+          name:        gt.name,
+          sip:         0,
+          fund:        isGoalNow ? 0 : currentFund,          // show 0 once withdrawn
+          outflow:     isGoalNow ? (gt.savedFundAtGoal || 0) : 0,
+          achieved:    isGoalNow,
+          sipDone:     false,
+          fundAtRet:   gt.fundAtRetirement || 0,
+          fundAtGoal:  gt.savedFundAtGoal  || 0,
+          futureTarget: gt.futureTarget,
+          postRetYrs:  gt.postRetYrs
+        };
+      })
+      .filter(x => x !== null);
     depRows.push({ year:TODAY+n1+y, age, annualInvestment:0, portfolio:Math.round(Math.max(0,retCorpus)), annualExpense:Math.round(annExp), goalOut:Math.round(goalOut), goalFunds:depGoalFunds });
     retCorpus = retCorpus*(1+inp.postReturn) - annExp - goalOut;
     if (retCorpus < 0) retCorpus = 0;
@@ -2023,6 +2039,13 @@ function buildTable(accRows, depRows, retirementAge) {
           + '🎯 <strong style="color:#8b6914;">' + gf.name + '</strong>'
           + '<span style="color:#aaa;"> · SIP: </span><span style="color:#c47d00;font-weight:600;">₹' + fmtCr(gf.sip) + '/yr</span>'
           + '<span style="color:#aaa;"> · fund: </span><span style="color:#555;">' + fmtCr(gf.fund) + '</span>'
+          + '</div>';
+      } else if (gf.fund > 0) {
+        // Post-retirement goal fund growing towards goal date — no SIP, not yet achieved
+        goalCell += '<div style="background:#f0f7ff;border:1px solid #b0ccee;border-radius:5px;padding:3px 7px;margin:2px 0;font-size:10px;">'
+          + '📈 <strong style="color:#185fa5;">' + gf.name + '</strong> growing'
+          + '<span style="color:#aaa;"> · fund: </span><span style="color:#185fa5;font-weight:600;">' + fmtCr(gf.fund) + '</span>'
+          + (gf.fundAtGoal > 0 ? '<span style="color:#aaa;"> · target at goal date: </span><span style="color:#1a6e35;font-weight:600;">' + fmtCr(gf.fundAtGoal) + '</span>' : '')
           + '</div>';
       }
     });
