@@ -35,6 +35,8 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; b
 .metric-card .sub { font-size: 11px; color: #888780; margin-top: 2px; }
 .info-btn { background:none; border:1.5px solid #bbb; border-radius:50%; width:16px; height:16px; font-size:10px; color:#888; cursor:pointer; padding:0; line-height:1; vertical-align:middle; margin-left:4px; font-style:normal; }
 .info-btn:hover { background:#185fa5; border-color:#185fa5; color:#fff; }
+details summary::-webkit-details-marker { display:none; }
+details[open] summary span:first-child { transform:rotate(90deg); display:inline-block; }
 .mc-success { background: #eaf3de; } .mc-success .val { color: #3b6d11; }
 .mc-danger  { background: #fcebeb; } .mc-danger  .val { color: #a32d2d; }
 .mc-info    { background: #e6f1fb; } .mc-info    .val { color: #185fa5; }
@@ -495,19 +497,56 @@ details.acc-panel .acc-body { padding:1.25rem 1.5rem 1.5rem; }
     <div id="info-popup-body"  style="font-size:13px;color:#444;line-height:1.8;"></div>
   </div>
 </div>
-<div id="statusBanner" class="banner" style="margin-bottom:1rem;"></div>
-<div class="grid-4" style="margin-bottom:1rem;">
-  <div class="metric-card mc-info"><div class="lbl">Corpus at retirement <button class="info-btn" onclick="showInfo('💼 Corpus at Retirement','<p>This is the total retirement fund you will have built by the time you stop working.</p><p>It is calculated by growing your current investable savings + your monthly SIP contributions at your expected pre-retirement return rate.</p><p><strong>Example:</strong> If you have ₹34L today and invest ₹45,000/month for 11 years at 10% return, your corpus at retirement is the total of all that growth.</p><p>This is the engine that will fund your entire retired life — so protecting and growing it is the most important financial task before retirement.</p>')">ⓘ</button></div><div class="val" id="m-corpus">—</div><div class="sub" id="m-years">—</div></div>
-  <div class="metric-card mc-warn"><div class="lbl">Corpus required <button class="info-btn" onclick="showInfo('📊 Corpus Required','<p>This is how much money you <strong>need</strong> on the day you retire to fund your entire retirement — from retirement age till life expectancy.</p><p>It accounts for inflation: your expenses will be higher in future because of rising prices, so the corpus needed is larger than it looks today.</p><p><strong>Formula used:</strong> Present Value of an inflation-adjusted annuity — meaning we calculate the lump sum today that, when invested at your post-retirement return, can pay out your growing expenses every year till age 85.</p><p>If your Corpus at Retirement ≥ Corpus Required → you are on track. If less → there is a shortfall to bridge.</p>')">ⓘ</button></div><div class="val" id="m-needed">—</div><div class="sub" id="m-survival">—</div></div>
-  <div class="metric-card" id="m-surplus-card"><div class="lbl">Surplus / Deficit <button class="info-btn" onclick="showInfo('✅ Surplus / ⚠️ Deficit','<p><strong>Surplus</strong> means your projected corpus is more than what you need — you have a financial cushion. You could retire earlier, spend more, or leave wealth for your family.</p><p><strong>Deficit</strong> means your projected corpus falls short of what is needed to fund your full retirement. Action is needed — either invest more, delay retirement, or reduce expenses.</p><p>This number = Corpus at Retirement − Corpus Required − Emergency Fund at Retirement.</p><p>The emergency fund is kept aside separately and not used for regular expenses.</p>')">ⓘ</button></div><div class="val" id="m-surplus">—</div><div class="sub" id="m-surplusNote">—</div></div>
-  <div class="metric-card"><div class="lbl">Monthly spend at retirement <button class="info-btn" onclick="showInfo('🛒 Monthly Spend at Retirement','<p>Your current monthly expenses, grown by inflation until your retirement date.</p><p>For example, if you spend ₹50,000/month today and inflation is 6%, in 11 years your same lifestyle will cost approximately ₹94,000/month — because prices of groceries, healthcare, travel, and everything else keep rising.</p><p>This is the amount your retirement corpus must be able to pay you every month on Day 1 of retirement.</p><p><strong>Tip:</strong> Healthcare inflation in India is 10–12% per year — budget extra for medical costs in old age.</p>')">ⓘ</button></div><div class="val" id="m-futureExpense">—</div><div class="sub">inflation-adjusted</div></div>
+<!-- ══ 3 CLEAR HERO CARDS ══════════════════════════════════════ -->
+<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:1rem;margin-bottom:1.25rem;">
+
+  <!-- Card 1: Will money last? -->
+  <div id="hero-last-card" style="border-radius:12px;padding:20px 18px;background:#f0faf4;border:2px solid #a8d8b0;text-align:center;">
+    <div style="font-size:12px;font-weight:700;color:#1a6e35;text-transform:uppercase;letter-spacing:0.05em;margin-bottom:8px;">Will your money last?</div>
+    <div id="hero-last-icon" style="font-size:32px;margin-bottom:6px;">⏳</div>
+    <div id="hero-last-val" style="font-size:22px;font-weight:800;color:#1a1a1a;">—</div>
+    <div id="hero-last-sub" style="font-size:12px;color:#555;margin-top:5px;line-height:1.5;">—</div>
+  </div>
+
+  <!-- Card 2: Monthly spend at retirement -->
+  <div style="border-radius:12px;padding:20px 18px;background:#f0f7ff;border:2px solid #b0ccee;text-align:center;">
+    <div style="font-size:12px;font-weight:700;color:#185fa5;text-transform:uppercase;letter-spacing:0.05em;margin-bottom:8px;">Your retirement monthly spend</div>
+    <div style="font-size:32px;margin-bottom:6px;">💸</div>
+    <div id="m-futureExpense" style="font-size:22px;font-weight:800;color:#1a1a1a;">—</div>
+    <div style="font-size:12px;color:#555;margin-top:5px;line-height:1.5;">Your today's expenses, grown by inflation — this is what you'll need every month from Day 1 of retirement</div>
+  </div>
+
+  <!-- Card 3: SIP status -->
+  <div id="hero-sip-card" style="border-radius:12px;padding:20px 18px;background:#fffbf0;border:2px solid #f0c040;text-align:center;">
+    <div style="font-size:12px;font-weight:700;color:#8b6914;text-transform:uppercase;letter-spacing:0.05em;margin-bottom:8px;">You're investing</div>
+    <div style="font-size:32px;margin-bottom:6px;">📈</div>
+    <div id="hero-sip-val" style="font-size:22px;font-weight:800;color:#1a1a1a;">—</div>
+    <div id="hero-sip-sub" style="font-size:12px;color:#555;margin-top:5px;line-height:1.5;">—</div>
+  </div>
+
 </div>
-<div class="grid-4" style="margin-bottom:1rem;">
-  <div class="metric-card"><div class="lbl">Emergency fund at retirement <button class="info-btn" onclick="showInfo('🆘 Emergency Fund at Retirement','<p>Even in retirement, you need a separate cash cushion for unexpected events — a medical emergency not covered by insurance, urgent home repair, or helping a family member.</p><p>This is set to your monthly expenses × number of emergency months (default 6), grown by inflation until retirement.</p><p><strong>Crucially:</strong> This money is kept in a <strong>liquid fund or savings account</strong> — NOT invested in equity or long-term instruments. You must be able to access it within 1–2 days.</p><p>It is already subtracted from your surplus/deficit calculation — so your surplus number already assumes this money is set aside.</p>')">ⓘ</button></div><div class="val" id="m-emergency">—</div><div class="sub" id="m-emergencyNote">already deducted from surplus</div></div>
-  <div class="metric-card"><div class="lbl">Safe monthly drawdown <button class="info-btn" onclick="showInfo('💰 Safe Monthly Drawdown — 4% SWR Rule','<p><strong>SWR</strong> stands for <strong>Safe Withdrawal Rate</strong>.</p><p>Research (originally from the US) found that if you withdraw 4% of your retirement corpus in Year 1, and increase it by inflation each year, your money has historically lasted 30+ years without running out — even through market crashes.</p><p><strong>Example:</strong> If your corpus is ₹2.5 Crore → 4% of that = ₹10 Lakhs/year → ₹83,333/month is your safe monthly drawdown.</p><p><strong>Important for India:</strong> Due to higher inflation in India, many planners recommend using 3–3.5% instead of 4%. The Withdrawal Strategy section (Section 5) shows the India-adjusted rate for your plan.</p><p>If your actual monthly need is higher than this safe drawdown amount, your corpus may run out before age 85 — which is a warning sign to either build a larger corpus or reduce expenses.</p>')">ⓘ</button></div><div class="val" id="m-swr">—</div><div class="sub">4% SWR rule</div></div>
-  <div class="metric-card"><div class="lbl">Real return (post-retirement) <button class="info-btn" onclick="showInfo('📈 Real Return','<p><strong>Real return</strong> = Your investment return − Inflation rate.</p><p>This tells you how much your money is <em>actually</em> growing in purchasing power — not just in number terms.</p><p><strong>Example:</strong> If your retirement portfolio earns 8% per year, but inflation is 6%, your real return is only 2%. This means your money buys only 2% more goods each year — even though the number in your account grew by 8%.</p><p><strong>Why it matters:</strong> A positive real return means your corpus is growing in real terms and can sustain withdrawals longer. A real return close to 0% or negative is dangerous — your corpus will erode in purchasing power even if the account balance seems stable.</p><p><strong>Target:</strong> Aim for at least 2–3% real return in retirement.</p>')">ⓘ</button></div><div class="val" id="m-realReturn">—</div><div class="sub">return − inflation</div></div>
-  <div class="metric-card"><div class="lbl">Total invested (pre-retirement) <button class="info-btn" onclick="showInfo('🏦 Total Invested (Pre-Retirement)','<p>This is the total amount of money <strong>you personally put in</strong> towards retirement over your entire working life — your existing portfolio today plus all future SIP contributions until retirement.</p><p>The difference between this number and your Corpus at Retirement is the power of <strong>compounding</strong> — your money earning returns, and those returns earning more returns.</p><p><strong>Example:</strong> If you invest ₹1.2 Crore total over 11 years but your corpus grows to ₹2.5 Crore, the extra ₹1.3 Crore was created purely by compounding — your money working for you without any extra effort.</p><p>This is why starting early and staying invested matters so much.</p>')">ⓘ</button></div><div class="val" id="m-totalInvested">—</div><div class="sub">your contribution</div></div>
-</div>
+
+<!-- ══ COLLAPSIBLE ADVANCED DETAILS ══════════════════════════ -->
+<details style="margin-bottom:1rem;">
+  <summary style="cursor:pointer;font-size:12px;font-weight:600;color:#888;padding:8px 12px;background:#f5f3ef;border-radius:8px;list-style:none;display:flex;align-items:center;gap:6px;">
+    <span>▶</span> Advanced details — for the curious (formula-based numbers)
+  </summary>
+  <div style="margin-top:10px;padding:12px;background:#fafaf8;border-radius:8px;border:1px solid #e8e5e0;">
+    <div style="font-size:11px;color:#999;margin-bottom:10px;">⚠️ The formula below assumes ALL expenses continue till age <span id="adv-life-age">85</span>. If you have time-bound expenses, the year-by-year simulation in Section 9 is more accurate.</div>
+    <div class="grid-4" style="margin-bottom:0.75rem;">
+      <div class="metric-card mc-info" style="padding:10px 12px;"><div class="lbl" style="font-size:10px;">Corpus at retirement</div><div class="val" id="m-corpus" style="font-size:17px;">—</div><div class="sub" id="m-years">—</div></div>
+      <div class="metric-card mc-warn" style="padding:10px 12px;"><div class="lbl" style="font-size:10px;">Corpus required (formula)</div><div class="val" id="m-needed" style="font-size:17px;">—</div><div class="sub" id="m-survival">—</div></div>
+      <div class="metric-card" id="m-surplus-card" style="padding:10px 12px;"><div class="lbl" style="font-size:10px;">Formula surplus / deficit</div><div class="val" id="m-surplus" style="font-size:17px;">—</div><div class="sub" id="m-surplusNote">—</div></div>
+      <div class="metric-card" style="padding:10px 12px;"><div class="lbl" style="font-size:10px;">Emergency fund at retirement</div><div class="val" id="m-emergency" style="font-size:17px;">—</div><div class="sub" id="m-emergencyNote">—</div></div>
+    </div>
+    <div class="grid-4">
+      <div class="metric-card" style="padding:10px 12px;"><div class="lbl" style="font-size:10px;">Safe drawdown (4% SWR)</div><div class="val" id="m-swr" style="font-size:17px;">—</div><div class="sub">4% of corpus ÷ 12</div></div>
+      <div class="metric-card" style="padding:10px 12px;"><div class="lbl" style="font-size:10px;">Real return (post-retirement)</div><div class="val" id="m-realReturn" style="font-size:17px;">—</div><div class="sub">return − inflation</div></div>
+      <div class="metric-card" style="padding:10px 12px;"><div class="lbl" style="font-size:10px;">Total you invested (pre-ret.)</div><div class="val" id="m-totalInvested" style="font-size:17px;">—</div><div class="sub">your contribution</div></div>
+      <div class="metric-card" style="padding:10px 12px;"><div class="lbl" style="font-size:10px;">Compounding bonus</div><div class="val" id="m-compounding" style="font-size:17px;">—</div><div class="sub">corpus − what you invested</div></div>
+    </div>
+  </div>
+</details>
 <!-- Total Monthly Commitment breakdown — populated by update() -->
 <div id="commitment-breakdown" style="margin-bottom:1.5rem;"></div>
 
@@ -2235,24 +2274,72 @@ function update() {
 
   const res = calculate(inp);
 
+  // ── Advanced (formula) cards ─────────────────────────────────
   document.getElementById('m-corpus').textContent        = fmtCr(res.corpusAtRetirement);
   document.getElementById('m-years').textContent         = `in ${res.n1} years (age ${inp.retirementAge})`;
   document.getElementById('m-needed').textContent        = fmtCr(res.corpusRequired);
   document.getElementById('m-survival').textContent      = `to sustain till age ${inp.lifeExpectancy}`;
   document.getElementById('m-futureExpense').textContent = fmtCr(res.futureMonthlyExpense);
-
   const sc = document.getElementById('m-surplus-card');
-  sc.className = 'metric-card ' + (res.surplusDeficit>=0?'mc-success':'mc-danger');
+  sc.className = 'metric-card ' + (res.surplusDeficit>=0?'mc-success':'mc-danger') + '" style="padding:10px 12px;';
   document.getElementById('m-surplus').textContent    = fmtCr(Math.abs(res.surplusDeficit));
   document.getElementById('m-surplusNote').textContent = res.surplusDeficit>=0?'surplus after emergency fund':'shortfall — action needed';
-
   document.getElementById('m-emergency').textContent     = fmtCr(res.emergencyFund);
   document.getElementById('m-emergencyNote').textContent  = `${inp.emergencyMonths} months of expenses`;
   document.getElementById('m-swr').textContent           = fmtCr(res.swrMonthly)+'/mo';
   document.getElementById('m-realReturn').textContent    = (res.realRate*100).toFixed(1)+'%';
   document.getElementById('m-totalInvested').textContent = fmtCr(res.totalInvested);
+  const compBonus = Math.max(0, res.corpusAtRetirement - res.totalInvested);
+  const compEl = document.getElementById('m-compounding');
+  if (compEl) compEl.textContent = fmtCr(Math.round(compBonus));
+  const advLife = document.getElementById('adv-life-age');
+  if (advLife) advLife.textContent = inp.lifeExpectancy;
 
-  const banner = document.getElementById('statusBanner');
+  // ── Hero Card 1: Will your money last? (simulation-based truth) ───
+  const lastDepRow = res.depRows && res.depRows.length > 0 ? res.depRows[res.depRows.length-1] : null;
+  const corpusLastsTillEnd = lastDepRow && lastDepRow.portfolio > 0;
+  const heroLastCard = document.getElementById('hero-last-card');
+  const heroLastIcon = document.getElementById('hero-last-icon');
+  const heroLastVal  = document.getElementById('hero-last-val');
+  const heroLastSub  = document.getElementById('hero-last-sub');
+  if (heroLastCard && heroLastIcon && heroLastVal && heroLastSub) {
+    if (corpusLastsTillEnd) {
+      heroLastCard.style.background = '#f0faf4';
+      heroLastCard.style.borderColor = '#a8d8b0';
+      heroLastIcon.textContent = '✅';
+      heroLastVal.textContent  = `Yes — till age ${inp.lifeExpectancy}`;
+      heroLastVal.style.color  = '#1a6e35';
+      heroLastSub.textContent  = `Your corpus lasts the full retirement. Year-by-year simulation confirms this.`;
+    } else {
+      // Find depletion age
+      const depleteRow = res.depRows.find(r => r.portfolio <= 0);
+      const depleteAge = depleteRow ? depleteRow.age : '?';
+      heroLastCard.style.background = '#fff5f5';
+      heroLastCard.style.borderColor = '#f5c6c6';
+      heroLastIcon.textContent = '⚠️';
+      heroLastVal.textContent  = `Runs out at age ${depleteAge}`;
+      heroLastVal.style.color  = '#c0392b';
+      heroLastSub.textContent  = `Increase your SIP or reduce expenses to close this gap.`;
+    }
+  }
+
+  // ── Hero Card 3: SIP status ────────────────────────────────────────
+  const heroSipCard = document.getElementById('hero-sip-card');
+  const heroSipVal  = document.getElementById('hero-sip-val');
+  const heroSipSub  = document.getElementById('hero-sip-sub');
+  if (heroSipCard && heroSipVal && heroSipSub) {
+    const userMonthly = Math.round((inp.annualInvestment||0)/12);
+    const retMonthly  = Math.round((res.retirementAnnInv||0)/12);
+    const goalMonthly = Math.round((res.goalBaseAnnualSIP||0)/12);
+    heroSipVal.textContent = fmtCr(userMonthly) + '/mo';
+    if (goalMonthly > 0) {
+      heroSipSub.innerHTML = `<span style="color:#185fa5;">🏦 ${fmtCr(retMonthly)}/mo → retirement</span><br><span style="color:#8b6914;">🎯 ${fmtCr(goalMonthly)}/mo → goals</span>`;
+    } else {
+      heroSipSub.textContent = `All going towards retirement buckets`;
+    }
+  }
+
+  const banner = document.getElementById('statusBanner'); if(banner) banner.style.display='none';
   const ratio = res.corpusAtRetirement / res.corpusRequired;
   const _retActualMonthly = Math.round((res.retirementAnnInv||0)/12);
   // Check simulation: does corpus actually last till life expectancy?
@@ -2685,23 +2772,61 @@ function renderAllocSection() {
 
   // ── Big rupee cards: retirement buckets + goal fund cards ────────────────
   const cards = document.getElementById('alloc-rupee-cards');
+
+  // Actual retirement SIP available (after goal SIPs deducted)
+  const actualRetSIPmonthly = Math.round((res.retirementAnnInv||0) / 12);
+  // Split actual SIP proportionally across buckets using the ideal fractions
+  const b1Actual = Math.round(actualRetSIPmonthly * b1Frac);
+  const b2Actual = Math.round(actualRetSIPmonthly * b2Frac);
+  const b3Actual = actualRetSIPmonthly - b1Actual - b2Actual;
+
+  // Explanation banner above cards
+  const sipBannerHtml = `<div style="grid-column:1/-1;background:#f0f7ff;border:1px solid #b0ccee;border-radius:8px;padding:10px 14px;font-size:12px;color:#1a3a5c;margin-bottom:4px;">
+    <strong>How to read these cards:</strong> Your ₹${actualRetSIPmonthly.toLocaleString('en-IN')}/mo retirement SIP is split proportionally across these 3 buckets.
+    The <em>Target at retirement</em> is what each bucket needs to fund your retirement.
+    Your <em>existing portfolio already covers a large part</em> of it — so the monthly SIP needed is just the remaining gap.
+    ${totalGoalSIP > actualRetSIPmonthly ? `<br><span style="color:#c0392b;">⚠️ Note: Ideal total (₹${Math.round(totalGoalSIP).toLocaleString('en-IN')}/mo) is more than your available retirement SIP (₹${actualRetSIPmonthly.toLocaleString('en-IN')}/mo). Your existing portfolio bridges the difference — corpus is projected to last till age ${inp.lifeExpectancy}.</span>` : ''}
+  </div>`;
+
   const retBucketCards = [
-    { label:'💰 B1 — Liquid / Debt', color:'#34a853', sip:b1SIP, target:b1Target,
-      covered:b1Covered, sub:'Liquid MF · Overnight Fund · FD' },
-    { label:'🔄 B2 — Hybrid / Debt+', color:'#f5a623', sip:b2SIP, target:b2Target,
-      covered:b2Covered, sub:'BAF · PPF · NPS Tier 1' },
-    { label:'📈 B3 — Equity', color:'#185fa5', sip:b3SIP, target:b3Target,
-      covered:b3Covered, sub:'Nifty 50 · Flexi-cap · ELSS' },
+    { label:'💰 B1 — Liquid / Debt', color:'#34a853', sip:b1SIP, actual:b1Actual, target:b1Target,
+      nowAmt:adjB1, growsTo:existB1at, covered:b1Covered, rate:portR1*100, sub:'Liquid MF · Overnight Fund · FD' },
+    { label:'🔄 B2 — Hybrid / Debt+', color:'#f5a623', sip:b2SIP, actual:b2Actual, target:b2Target,
+      nowAmt:adjB2, growsTo:existB2at, covered:b2Covered, rate:portR2*100, sub:'BAF · PPF · NPS Tier 1' },
+    { label:'📈 B3 — Equity', color:'#185fa5', sip:b3SIP, actual:b3Actual, target:b3Target,
+      nowAmt:adjB3, growsTo:existB3at, covered:b3Covered, rate:portR3*100, sub:'Nifty 50 · Flexi-cap · ELSS' },
   ].map(c => `
     <div style="background:#fafaf8;border:1.5px solid ${c.color}44;border-radius:10px;padding:14px 12px;">
       <div style="font-size:11px;font-weight:700;color:${c.color};text-transform:uppercase;letter-spacing:0.05em;margin-bottom:6px;">${c.label}</div>
-      <div style="font-size:11px;color:#888;margin-bottom:4px;">Target at retirement</div>
-      <div style="font-size:18px;font-weight:800;color:#1a1a1a;">${fmtCr(c.target)}</div>
-      ${c.covered > 1000 ? `<div style="font-size:11px;color:#1a6e35;margin-top:3px;">✅ ₹${Math.round(c.covered/100000)/10}L covered by existing portfolio</div>` : ''}
-      <div style="border-top:1px solid #e8e5e0;margin-top:8px;padding-top:8px;">
-        <div style="font-size:11px;color:#888;">Monthly SIP needed</div>
-        <div style="font-size:20px;font-weight:800;color:${c.color};">${fmtCr(Math.round(c.sip))}<span style="font-size:12px;font-weight:500;color:#777;">/mo</span></div>
-        <div style="font-size:10px;color:#999;margin-top:2px;">${c.sub}</div>
+
+      <!-- Journey: Today → Retirement -->
+      <div style="background:#f5f3ef;border-radius:7px;padding:8px 10px;margin-bottom:8px;font-size:11px;">
+        <div style="display:flex;justify-content:space-between;align-items:center;gap:4px;">
+          <div style="text-align:center;">
+            <div style="color:#888;font-size:10px;">You have today</div>
+            <div style="font-weight:700;color:#1a1a1a;">${fmtCr(Math.round(c.nowAmt))}</div>
+          </div>
+          <div style="color:#bbb;font-size:14px;">→</div>
+          <div style="text-align:center;">
+            <div style="color:#888;font-size:10px;">Grows to (${c.rate.toFixed(0)}% × ${n1}yr)</div>
+            <div style="font-weight:700;color:${c.color};">${fmtCr(Math.round(c.growsTo))}</div>
+          </div>
+          <div style="color:#bbb;font-size:14px;">→</div>
+          <div style="text-align:center;">
+            <div style="color:#888;font-size:10px;">Target needed</div>
+            <div style="font-weight:700;color:#1a1a1a;">${fmtCr(Math.round(c.target))}</div>
+          </div>
+        </div>
+      </div>
+
+      <div style="border-top:1px solid #e8e5e0;margin-top:4px;padding-top:8px;">
+        ${c.sip < 1
+          ? `<div style="font-size:13px;font-weight:700;color:#1a6e35;">✅ No SIP needed</div>
+             <div style="font-size:10px;color:#888;margin-top:3px;">Your existing ${fmtCr(Math.round(c.nowAmt))} grows to ${fmtCr(Math.round(c.growsTo))} — more than the ${fmtCr(Math.round(c.target))} target.</div>`
+          : `<div style="font-size:11px;color:#555;font-weight:600;">Additional SIP needed</div>
+             <div style="font-size:20px;font-weight:800;color:${c.color};margin-top:2px;">${fmtCr(Math.round(c.actual))}<span style="font-size:12px;font-weight:500;color:#777;">/mo</span></div>
+             <div style="font-size:10px;color:#aaa;margin-top:2px;">Gap = ${fmtCr(Math.round(c.target - c.covered))} · your share of ₹${actualRetSIPmonthly.toLocaleString('en-IN')}/mo retirement SIP</div>`}
+        <div style="font-size:10px;color:#999;margin-top:4px;">${c.sub}</div>
       </div>
     </div>`).join('');
 
@@ -2727,7 +2852,7 @@ function renderAllocSection() {
       + '</div></div>'
     : '';
 
-  cards.innerHTML = retBucketCards + goalFundCards;
+  cards.innerHTML = sipBannerHtml + retBucketCards + goalFundCards;
 
   // ── Populate commitment breakdown in overview ─────────────────────────────
   const cbEl = document.getElementById('commitment-breakdown');
