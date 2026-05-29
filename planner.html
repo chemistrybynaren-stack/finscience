@@ -2345,8 +2345,6 @@ function update() {
   const _retActualMonthly = Math.round((res.retirementAnnInv||0)/12);
   // Check simulation: does corpus actually last till life expectancy?
   // depRows tracks the real year-by-year depletion with time-bound expenses
-  const lastDepRow = res.depRows && res.depRows.length > 0 ? res.depRows[res.depRows.length-1] : null;
-  const corpusLastsTillEnd = lastDepRow && lastDepRow.portfolio > 0;
   // Time-bound expense note
   const timeBoundCount = (typeof expRows !== 'undefined') ? expRows.filter(r => r.untilAge && +r.untilAge > 0 && +r.untilAge < inp.lifeExpectancy).length : 0;
   const tbNote = timeBoundCount > 0 ? ` (${timeBoundCount} time-bound expense${timeBoundCount>1?'s':''} reduce drawdown over time — simulation confirms corpus lasts till age ${inp.lifeExpectancy})` : '';
