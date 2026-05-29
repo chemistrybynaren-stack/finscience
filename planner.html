@@ -845,7 +845,7 @@ document.getElementById('today-date').textContent = new Date().toLocaleDateStrin
 ════════════════════════════════════════════ */
 const EXP_COLORS = ['#185fa5','#3b6d11','#854f0b','#791f1f','#533ab7','#0f6e56','#993556','#5f5e5a','#ba7517','#a32d2d','#1d9e75','#d85a30'];
 let expMode = 'itemised';
-let expRows = [
+const DEFAULT_EXP_ROWS = [
   { id:1, name:'Groceries & household', amount:8000,  note:'',                      untilAge:'' },
   { id:2, name:'Fuel & travel',         amount:5000,  note:'',                      untilAge:'' },
   { id:3, name:'Clothing & personal',   amount:4000,  note:'',                      untilAge:'' },
@@ -855,6 +855,7 @@ let expRows = [
   { id:7, name:'Medical & insurance',   amount:4000,  note:'',                      untilAge:'' },
   { id:8, name:'Miscellaneous',         amount:3000,  note:'',                      untilAge:'' },
 ];
+let expRows = DEFAULT_EXP_ROWS.map(r => ({...r}));
 let nextExpId = 9;
 let expDonutChart = null;
 
@@ -2415,11 +2416,11 @@ function saveData() {
       portB3Rate:       document.getElementById('portB3Rate').value,
     }
   };
-  try { localStorage.setItem('finplan_v5', JSON.stringify(d)); } catch(e){}
+  try { localStorage.setItem('finplan_v6', JSON.stringify(d)); } catch(e){}
 }
 
 function loadData() {
-  let d; try { d = JSON.parse(localStorage.getItem('finplan_v5')); } catch(e){ return false; }
+  let d; try { d = JSON.parse(localStorage.getItem('finplan_v6')); } catch(e){ return false; }
   if (!d) { var b=document.getElementById("freshStartBanner"); if(b) b.style.display=""; return false; }
   if (d.expRows  && d.expRows.length  > 0) expRows  = d.expRows;
   if (Array.isArray(d.goals))              goals    = d.goals;
@@ -2434,7 +2435,7 @@ function loadData() {
 
 function exportData() {
   try {
-    var raw = localStorage.getItem('finplan_v5');
+    var raw = localStorage.getItem('finplan_v6');
     if (!raw) { alert('No saved data yet — use the planner first, then export.'); return; }
     var blob = new Blob([raw], { type: 'application/json' });
     var a = document.createElement('a');
@@ -2452,7 +2453,7 @@ function importData(input) {
     try {
       var parsed = JSON.parse(e.target.result);
       if (!parsed || typeof parsed !== 'object') throw new Error('Invalid file');
-      localStorage.setItem('finplan_v5', JSON.stringify(parsed));
+      localStorage.setItem('finplan_v6', JSON.stringify(parsed));
       alert('Data imported! Reloading…'); location.reload();
     } catch(err) { alert('Import failed: ' + err.message); }
   };
@@ -2462,7 +2463,7 @@ function importData(input) {
 
 function resetData() {
   if (!confirm('This will clear all your saved data and reset to defaults. Use this before sharing the file with someone else. Continue?')) return;
-  try { localStorage.removeItem('finplan_v5'); } catch(e){}
+  try { localStorage.removeItem('finplan_v6'); } catch(e){}
   location.reload();
 }
 
@@ -2519,6 +2520,14 @@ document.getElementById('monthlyExpenseLump').addEventListener('input', () => {
 });
 
 try { loadData(); } catch(e) { console.error('loadData:', e); }
+// Safety: if expRows is empty or all-zero after loading (e.g. from a crash), restore defaults
+try {
+  const expTotal = expRows.reduce((s,r) => s+(+r.amount||0), 0);
+  if (expRows.length === 0 || (expTotal === 0 && expRows.every(r => !r.name))) {
+    expRows = DEFAULT_EXP_ROWS.map(r => ({...r}));
+    nextExpId = 9;
+  }
+} catch(e) {}
 try { if (expMode === 'lumpsum') switchExpMode('lumpsum'); } catch(e) {}
 try { renderExpTable(); } catch(e) { console.error('renderExpTable:', e); }
 try { update(); } catch(e) { console.error('update (init):', e); }
