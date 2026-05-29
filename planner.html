@@ -1228,7 +1228,7 @@ function updateNW() {
 
   // rows
   const rows = [
-    { label:'Liquid portfolio (today)',  val:liquidNow,   color:'#185fa5', liquid:true },
+    { label:'Liquid portfolio (today, incl. reserves & goal funds)',  val:liquidNow,   color:'#185fa5', liquid:true },
     { label:'Real estate (today)',       val:reNow,        color:'#3b6d11', liquid:false },
     { label:'Gold (today)',              val:g.now,        color:'#854f0b', liquid:false },
     { label:'Total net worth (today)',   val:totalNow,     color:null,      liquid:null },
@@ -1362,9 +1362,12 @@ function calculate(inp) {
   const n1 = Math.max(0, inp.retirementAge - inp.currentAge);
   const n2 = Math.max(1, inp.lifeExpectancy - inp.retirementAge);
 
-  // Investable portfolio = total entered minus the two reserve pots
+  // Investable portfolio = total minus reserves AND current goal investments
+  // (goal investments grow separately in their own funds — not part of retirement corpus)
   const efReserve = Math.round(inp.monthlyExpense * (inp.emergencyMonths || 6));
-  const investablePortfolio = Math.max(0, inp.currentPortfolio - (inp.healthEmergencyLump || 0) - efReserve);
+  const currentGoalInvestments = (typeof goals !== 'undefined')
+    ? goals.reduce((s,g) => s + (g.currentInvestment||0), 0) : 0;
+  const investablePortfolio = Math.max(0, inp.currentPortfolio - (inp.healthEmergencyLump || 0) - efReserve - currentGoalInvestments);
 
   // ── Non-corpus goal fund trackers (goals with their own dedicated SIP) ──────
   // Includes ALL non-corpus goals (pre- AND post-retirement).
@@ -1884,7 +1887,7 @@ function buildInsights(inp, res) {
   // Helper: extra years at current trajectory
   function yearsToClose() {
     let c = res.corpusAtRetirement;
-    let annInv = inp.annualInvestment;
+    let annInv = res.retirementAnnInv;  // retirement-only SIP, not total
     for (let y=1; y<=20; y++) {
       annInv *= (1+inp.investGrowth);
       c = c*(1+inp.preReturn) + annInv;
@@ -1905,8 +1908,8 @@ function buildInsights(inp, res) {
          </div>
          <div style="font-size:12px;line-height:1.9;margin-top:6px;">
            <strong>Why does this gap exist?</strong><br>
-           Your current liquid portfolio is <strong>${fmtCr(inp.currentPortfolio)}</strong> and you invest
-           <strong>${fmtCr(inp.annualInvestment)}/year</strong> for <strong>${res.n1} years</strong>.
+           Your retirement-investable portfolio today is <strong>${fmtCr(Math.max(0, inp.currentPortfolio - (inp.healthEmergencyLump||0) - Math.round(inp.monthlyExpense*(inp.emergencyMonths||6)) - ((typeof goals!=='undefined')?goals.reduce((s,g)=>s+(g.currentInvestment||0),0):0)))}</strong> and you invest
+           <strong>${fmtCr(res.retirementAnnInv)}/year towards retirement</strong> (total SIP minus goal SIPs) for <strong>${res.n1} years</strong>.
            At <strong>${(inp.preReturn*100).toFixed(0)}% p.a.</strong> return that grows to <strong>${fmtCr(res.corpusAtRetirement)}</strong>.
            However your monthly expense of <strong>${fmtCr(inp.monthlyExpense)}</strong> becomes
            <strong>${fmtCr(res.futureMonthlyExpense)}/month</strong> by retirement after
@@ -1981,7 +1984,7 @@ function buildTable(accRows, depRows, retirementAge) {
     thead.innerHTML = `<tr>
       <th>Year</th>
       <th style="text-align:right;">Age</th>
-      <th style="text-align:right;">Annual investment<br><span style="font-size:9px;font-weight:400;color:#aaa;">retirement + goal SIPs</span></th>
+      <th style="text-align:right;">Annual investment<br><span style="font-size:9px;font-weight:400;color:#aaa;">retirement SIP only</span></th>
       <th style="text-align:right;">Total Wealth<br><span style="font-size:9px;font-weight:400;color:#aaa;">retirement corpus + goal funds</span></th>
       <th style="text-align:right;">Annual expense</th>
       <th style="text-align:right;">Goal outflows &amp; funds</th>
@@ -2069,8 +2072,8 @@ function renderSafetyNet(inp, res) {
   const reserved   = efAmt + healthEF;
   const goalFundTotal = (typeof goals !== 'undefined')
     ? goals.reduce((s,g) => s+(g.currentInvestment||0), 0) : 0;
-  const investable = Math.max(0, portfolio - reserved);
-  const retInvestable = Math.max(0, investable - goalFundTotal);
+  const investable = Math.max(0, portfolio - reserved - goalFundTotal);
+  const retInvestable = investable;  // investable IS retirement-only now
 
   // Find medical premium from itemised expenses
   let medPremium = 0;
@@ -2102,7 +2105,7 @@ function renderSafetyNet(inp, res) {
       </div>
     </div>
     <div style="font-size:11px;color:#888;text-align:center;margin-bottom:12px;padding:5px;background:#f8f7f3;border-radius:6px;">
-      Total portfolio ₹${portfolio.toLocaleString('en-IN')} = 🔒 Reserved ${fmtCr(reserved)} (not invested) + 📈 Investable ${fmtCr(investable)}
+      Total ₹${portfolio.toLocaleString('en-IN')} = 🔒 Reserves ${fmtCr(reserved)} + 🎯 Goal funds ${fmtCr(goalFundTotal)} + 📈 Retirement investable ${fmtCr(investable)}
     </div>`;
 
   // ── Detail rows ─────────────────────────────────────────────────────────────
@@ -2517,18 +2520,29 @@ function renderAllocSection() {
   const portR2 = (+document.getElementById('portB2Rate').value || 9)  / 100;
   const portR3 = (+document.getElementById('portB3Rate').value || 12) / 100;
 
+  // Subtract goal investments from bucket amounts before projecting
+  // (goal money sits inside B1/B2/B3 but grows separately for goals, not for retirement)
+  const goalInvForBuckets = (typeof goals !== 'undefined') ? goals.reduce((s,g) => s+(g.currentInvestment||0), 0) : 0;
+  // Deduct goal investments from B3 first (equity), then B2, then B1
+  let adjB3 = Math.max(0, portB3Now - goalInvForBuckets);
+  let rem3   = Math.max(0, goalInvForBuckets - portB3Now);
+  let adjB2 = Math.max(0, portB2Now - rem3);
+  let rem2   = Math.max(0, rem3 - portB2Now);
+  let adjB1 = Math.max(0, portB1Now - rem2);
+
   // If split is filled → each grows at its own rate. Otherwise fall back to blended.
   let existB1at, existB2at, existB3at;
   if (portSplitSum > 0) {
-    existB1at = portB1Now * Math.pow(1 + portR1, n1);
-    existB2at = portB2Now * Math.pow(1 + portR2, n1);
-    existB3at = portB3Now * Math.pow(1 + portR3, n1);
+    existB1at = adjB1 * Math.pow(1 + portR1, n1);
+    existB2at = adjB2 * Math.pow(1 + portR2, n1);
+    existB3at = adjB3 * Math.pow(1 + portR3, n1);
   } else {
     existB1at = 0;
     existB2at = 0;
     // No split entered — grow full investable portfolio at blended rate
     const _efR = Math.round(inp.monthlyExpense * (inp.emergencyMonths||6));
-    const _inv = Math.max(0, inp.currentPortfolio - (inp.healthEmergencyLump||0) - _efR);
+    const _goalInv = (typeof goals !== 'undefined') ? goals.reduce((s,g) => s+(g.currentInvestment||0), 0) : 0;
+    const _inv = Math.max(0, inp.currentPortfolio - (inp.healthEmergencyLump||0) - _efR - _goalInv);
     existB3at = _inv * Math.pow(1 + inp.preReturn, n1);
   }
 
@@ -2657,18 +2671,29 @@ function renderAllocSection() {
   // ── Populate commitment breakdown in overview ─────────────────────────────
   const cbEl = document.getElementById('commitment-breakdown');
   if (cbEl) {
-    const grandTotal = totalGoalSIP + totalExternalGoalSIP;
-    const gapSign    = totalMonthlySIP - grandTotal;
-    const gapColor   = gapSign >= 0 ? '#1a6e35' : '#c0392b';
-    const gapLabel   = gapSign >= 0 ? `✅ Surplus: +${fmtCr(Math.round(gapSign))}/mo` : `⚠️ Shortfall: ${fmtCr(Math.round(-gapSign))}/mo`;
+    // actualRetSIP = what actually flows to retirement buckets (user SIP minus goal SIPs)
+    const actualRetSIP   = Math.max(0, totalMonthlySIP - Math.round(totalExternalGoalSIP));
+    const grandTotal     = actualRetSIP + totalExternalGoalSIP; // = totalMonthlySIP always
+    const gapSign        = totalMonthlySIP - grandTotal;        // always 0 — real gap shown via reqd vs actual
+    // Show meaningful gap: required retirement SIP vs actual retirement SIP
+    const reqRetSIP      = Math.round(totalGoalSIP); // what you'd need from scratch (no existing portfolio)
+    const retGap         = reqRetSIP - actualRetSIP;
+    const gapColor   = retGap <= 0 ? '#1a6e35' : '#c0392b';
+    const gapLabel   = retGap <= 0
+      ? `✅ Your SIP covers all commitments`
+      : `⚠️ Retirement SIP short by ${fmtCr(retGap)}/mo vs required`;
     cbEl.innerHTML = `
       <div style="background:#f8f7f3;border:1px solid #e8e5e0;border-radius:10px;padding:12px 16px;">
         <div style="font-size:12px;font-weight:700;color:#333;margin-bottom:10px;">📋 Monthly Investment Commitment — complete picture</div>
+        <div style="font-size:11px;color:#888;margin-bottom:8px;padding:6px 10px;background:#fff;border-radius:6px;border-left:3px solid #c8dff5;">
+          💡 Your existing portfolio of <strong>${fmtCr(+document.getElementById('currentPortfolio')?.value||0)}</strong> grows alongside your SIP — so you need <em>less</em> monthly SIP than someone starting from scratch.
+        </div>
         <div style="display:flex;flex-wrap:wrap;gap:8px;align-items:center;font-size:13px;">
           <div style="background:#fff;border:1px solid #34a85344;border-radius:7px;padding:8px 12px;text-align:center;">
             <div style="font-size:10px;color:#888;">Retirement (B1+B2+B3)</div>
-            <div style="font-weight:700;color:#1a6e35;">${fmtCr(Math.round(totalGoalSIP))}/mo</div>
-            <div style="font-size:9px;color:#aaa;margin-top:2px;">required SIP (incl. existing portfolio benefit)</div>
+            <div style="font-weight:700;color:#1a6e35;">${fmtCr(actualRetSIP)}/mo</div>
+            <div style="font-size:9px;color:#aaa;margin-top:2px;">your actual SIP after goal deductions</div>
+            ${retGap > 0 ? `<div style="font-size:9px;color:#c0392b;margin-top:2px;">⚠️ Need ${fmtCr(reqRetSIP)}/mo if starting from zero</div>` : `<div style="font-size:9px;color:#1a6e35;margin-top:2px;">✅ Existing portfolio covers the rest</div>`}
           </div>
           ${externalGoals.map(g => `
           <div style="background:#fff;border:1px solid #f0c04066;border-radius:7px;padding:8px 12px;text-align:center;">
@@ -2684,25 +2709,27 @@ function renderAllocSection() {
           <div style="background:#fff;border:1px solid #18518544;border-radius:7px;padding:8px 12px;text-align:center;">
             <div style="font-size:10px;color:#888;">Your total SIP</div>
             <div style="font-weight:700;color:#185fa5;">${fmtCr(totalMonthlySIP)}/mo</div>
+            <div style="font-size:9px;color:#aaa;margin-top:2px;">${fmtCr(actualRetSIP)} retirement + ${fmtCr(Math.round(totalExternalGoalSIP))} goals</div>
           </div>
           <div style="display:flex;align-items:center;gap:6px;">
-            <div style="font-weight:700;color:${gapColor};font-size:13px;padding:4px 8px;background:${gapSign>=0?'#f0faf4':'#fff5f5'};border-radius:6px;">${gapLabel}</div>
-            ${gapSign < 0 ? `<button onclick="document.getElementById('shortfall-popup').style.display='flex';" style="background:none;border:1.5px solid #c0392b;border-radius:50%;width:20px;height:20px;cursor:pointer;font-size:11px;color:#c0392b;font-weight:700;padding:0;line-height:1;" title="Why this shortfall?">?</button>` : ''}
+            <div style="font-weight:700;color:${gapColor};font-size:13px;padding:4px 8px;background:${retGap<=0?'#f0faf4':'#fff5f5'};border-radius:6px;">${gapLabel}</div>
+            <button onclick="document.getElementById('shortfall-popup').style.display='flex';" style="background:none;border:1.5px solid #888;border-radius:50%;width:20px;height:20px;cursor:pointer;font-size:11px;color:#888;font-weight:700;padding:0;line-height:1;" title="How does this work?">?</button>
           </div>
-          <!-- Shortfall explanation popup -->
+          <!-- Explanation popup -->
           <div id="shortfall-popup" style="display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.45);z-index:9999;align-items:center;justify-content:center;" onclick="if(event.target===this)this.style.display='none';">
-            <div style="background:#fff;border-radius:14px;padding:24px 28px;max-width:460px;width:90%;box-shadow:0 8px 40px rgba(0,0,0,0.2);position:relative;">
+            <div style="background:#fff;border-radius:14px;padding:24px 28px;max-width:480px;width:90%;box-shadow:0 8px 40px rgba(0,0,0,0.2);position:relative;">
               <button onclick="document.getElementById('shortfall-popup').style.display='none';" style="position:absolute;top:12px;right:14px;background:none;border:none;font-size:18px;cursor:pointer;color:#888;">✕</button>
-              <div style="font-size:15px;font-weight:800;color:#1a1a1a;margin-bottom:14px;">⚠️ Why is there a shortfall?</div>
-              <div style="font-size:13px;color:#444;line-height:1.7;">
-                <p style="margin:0 0 10px;">Your <strong>Total Current Savings</strong> is large enough that the <em>retirement corpus projection alone</em> looks ~101% funded — meaning if all your investment went only to retirement, you'd just about make it.</p>
-                <p style="margin:0 0 10px;">But you also have <strong>goals</strong> (child education, car, etc.) that need their own dedicated SIP every month. These reduce how much actually goes towards retirement.</p>
-                <p style="margin:0 0 10px;padding:10px 12px;background:#fff5f5;border-left:3px solid #c0392b;border-radius:6px;">
-                  <strong>Total SIP needed:</strong> Retirement + all goals = <strong>₹${Math.round(grandTotal).toLocaleString('en-IN')}/mo</strong><br>
-                  <strong>Your entered SIP:</strong> <strong>₹${totalMonthlySIP.toLocaleString('en-IN')}/mo</strong><br>
-                  <strong>Gap:</strong> ₹${Math.round(-gapSign).toLocaleString('en-IN')}/mo
+              <div style="font-size:15px;font-weight:800;color:#1a1a1a;margin-bottom:14px;">💡 Why is corpus 101% funded even though retirement SIP is only ₹${fmtCr(actualRetSIP)}/mo?</div>
+              <div style="font-size:13px;color:#444;line-height:1.8;">
+                <p style="margin:0 0 10px;">The ₹${fmtCr(reqRetSIP)}/mo figure is what someone starting from <strong>zero savings</strong> would need. But you already have a portfolio working for you.</p>
+                <div style="padding:10px 12px;background:#f0faf4;border-left:3px solid #1a6e35;border-radius:6px;margin-bottom:10px;">
+                  <strong>Your existing portfolio</strong> grows over your ${Math.round(+document.getElementById('retirementAge')?.value - +document.getElementById('currentAge')?.value)||11} working years and contributes a large lump sum to your retirement corpus — reducing how much new SIP you need each month.<br><br>
+                  <strong>Actual retirement SIP:</strong> ₹${fmtCr(actualRetSIP)}/mo (your SIP minus goal SIPs)<br>
+                  <strong>Existing portfolio growth:</strong> does the rest ✅
+                </div>
+                <p style="margin:0;padding:10px 12px;background:#f8f7f3;border-radius:6px;font-size:12px;color:#666;">
+                  👉 <strong>What to watch:</strong> Make sure your total SIP of ₹${fmtCr(totalMonthlySIP)}/mo is actually being invested every month — ₹${fmtCr(actualRetSIP)} into retirement funds and ₹${fmtCr(Math.round(totalExternalGoalSIP))} into goal funds separately.
                 </p>
-                <p style="margin:0;color:#888;font-size:12px;">👉 Either increase your monthly SIP, or reduce goal targets to close this gap.</p>
               </div>
             </div>
           </div>
