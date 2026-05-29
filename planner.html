@@ -1529,9 +1529,9 @@ function refreshProfileBadge() {
   const el = document.getElementById('profile-years-badge');
   if (!el) return;
   const acc = ra - ca; const ret = le - ra;
-  el.innerHTML = '<strong>' + acc + ' yrs</strong> to build corpus'  
-    + ' &nbsp;·&nbsp; <strong>' + ret + ' yrs</strong> retirement'
-    + ' &nbsp;·&nbsp; Age <strong>' + ra + '</strong> → <strong>' + le + '</strong>';
+  el.innerHTML = '<strong>' + acc + ' yrs</strong>&nbsp; to build corpus'
+    + ' &nbsp;&nbsp;·&nbsp;&nbsp; <strong>' + ret + ' yrs</strong>&nbsp; retirement'
+    + ' &nbsp;&nbsp;·&nbsp;&nbsp; Age &nbsp;<strong>' + ra + '</strong> → <strong>' + le + '</strong>';
 }
 
 function updateSlider(id, dispId, suffix) {
@@ -2067,7 +2067,10 @@ function renderSafetyNet(inp, res) {
   const efAmt      = Math.round(monthly * efMonths);
   const healthEF   = inp.healthEmergencyLump || 0;
   const reserved   = efAmt + healthEF;
+  const goalFundTotal = (typeof goals !== 'undefined')
+    ? goals.reduce((s,g) => s+(g.currentInvestment||0), 0) : 0;
   const investable = Math.max(0, portfolio - reserved);
+  const retInvestable = Math.max(0, investable - goalFundTotal);
 
   // Find medical premium from itemised expenses
   let medPremium = 0;
@@ -2095,7 +2098,7 @@ function renderSafetyNet(inp, res) {
         <div style="font-size:10px;color:#1a6e35;font-weight:700;margin-bottom:3px;">📈 For Investment</div>
         <div style="font-size:14px;font-weight:800;color:#1a6e35;">${fmtCr(investable)}</div>
         <div style="font-size:10px;color:#888;">of your ₹${portfolio.toLocaleString('en-IN')}</div>
-        <div style="font-size:10px;color:#555;margin-top:3px;">Split across B1 / B2 / B3</div>
+        <div style="font-size:10px;color:#555;margin-top:3px;">Split across B1 / B2 / B3 / Current Goal Investments</div>
       </div>
     </div>
     <div style="font-size:11px;color:#888;text-align:center;margin-bottom:12px;padding:5px;background:#f8f7f3;border-radius:6px;">
@@ -2213,8 +2216,14 @@ function update() {
 
   const banner = document.getElementById('statusBanner');
   const ratio = res.corpusAtRetirement / res.corpusRequired;
-  if (ratio>=1.2){ banner.className='banner success'; banner.textContent=`On track — Projected corpus ${fmtCr(res.corpusAtRetirement)} exceeds requirement ${fmtCr(res.corpusRequired)}. Well positioned for FIRE at ${inp.retirementAge}.`; }
-  else if (ratio>=0.9){ banner.className='banner warn'; banner.textContent=`Nearly there — ${(ratio*100).toFixed(0)}% funded. A small top-up or 2-year delay closes the gap.`; }
+  const _userMonthly    = Math.round((inp.annualInvestment||0)/12);
+  const _goalSIPmonthly = Math.round((res.goalBaseAnnualSIP||0)/12);
+  const _retActualMonthly = Math.round((res.retirementAnnInv||0)/12); // what actually goes to retirement after goal deductions
+  // corpus is 101% because existing portfolio + retirementAnnInv covers it — that's correct
+  // shortfall in commitment section is separate: user hasn't entered enough total SIP to cover all goals + required retirement SIP
+  if (ratio>=1.2 && _goalSIPmonthly===0){ banner.className='banner success'; banner.textContent=`On track — Projected corpus ${fmtCr(res.corpusAtRetirement)} exceeds requirement. Well positioned for FIRE at ${inp.retirementAge}.`; }
+  else if (ratio>=1){ banner.className='banner success'; banner.textContent=`Retirement corpus is on track (${(ratio*100).toFixed(0)}% funded). Your existing portfolio + SIP of ₹${_retActualMonthly.toLocaleString('en-IN')}/mo covers retirement. Check the SIP commitment below to ensure goals are also funded.`; }
+  else if (ratio>=0.9){ banner.className='banner warn'; banner.textContent=`Nearly there — retirement corpus is ${(ratio*100).toFixed(0)}% funded. A small top-up or slight delay closes the gap.`; }
   else { banner.className='banner danger'; banner.textContent=`Only ${(ratio*100).toFixed(0)}% funded. Increase investments, adjust retirement age, or reduce target monthly expense.`; }
 
   renderGoals();
@@ -2659,6 +2668,7 @@ function renderAllocSection() {
           <div style="background:#fff;border:1px solid #34a85344;border-radius:7px;padding:8px 12px;text-align:center;">
             <div style="font-size:10px;color:#888;">Retirement (B1+B2+B3)</div>
             <div style="font-weight:700;color:#1a6e35;">${fmtCr(Math.round(totalGoalSIP))}/mo</div>
+            <div style="font-size:9px;color:#aaa;margin-top:2px;">required SIP (incl. existing portfolio benefit)</div>
           </div>
           ${externalGoals.map(g => `
           <div style="background:#fff;border:1px solid #f0c04066;border-radius:7px;padding:8px 12px;text-align:center;">
@@ -2675,7 +2685,27 @@ function renderAllocSection() {
             <div style="font-size:10px;color:#888;">Your total SIP</div>
             <div style="font-weight:700;color:#185fa5;">${fmtCr(totalMonthlySIP)}/mo</div>
           </div>
-          <div style="font-weight:700;color:${gapColor};font-size:13px;padding:4px 8px;background:${gapSign>=0?'#f0faf4':'#fff5f5'};border-radius:6px;">${gapLabel}</div>
+          <div style="display:flex;align-items:center;gap:6px;">
+            <div style="font-weight:700;color:${gapColor};font-size:13px;padding:4px 8px;background:${gapSign>=0?'#f0faf4':'#fff5f5'};border-radius:6px;">${gapLabel}</div>
+            ${gapSign < 0 ? `<button onclick="document.getElementById('shortfall-popup').style.display='flex';" style="background:none;border:1.5px solid #c0392b;border-radius:50%;width:20px;height:20px;cursor:pointer;font-size:11px;color:#c0392b;font-weight:700;padding:0;line-height:1;" title="Why this shortfall?">?</button>` : ''}
+          </div>
+          <!-- Shortfall explanation popup -->
+          <div id="shortfall-popup" style="display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.45);z-index:9999;align-items:center;justify-content:center;" onclick="if(event.target===this)this.style.display='none';">
+            <div style="background:#fff;border-radius:14px;padding:24px 28px;max-width:460px;width:90%;box-shadow:0 8px 40px rgba(0,0,0,0.2);position:relative;">
+              <button onclick="document.getElementById('shortfall-popup').style.display='none';" style="position:absolute;top:12px;right:14px;background:none;border:none;font-size:18px;cursor:pointer;color:#888;">✕</button>
+              <div style="font-size:15px;font-weight:800;color:#1a1a1a;margin-bottom:14px;">⚠️ Why is there a shortfall?</div>
+              <div style="font-size:13px;color:#444;line-height:1.7;">
+                <p style="margin:0 0 10px;">Your <strong>Total Current Savings</strong> is large enough that the <em>retirement corpus projection alone</em> looks ~101% funded — meaning if all your investment went only to retirement, you'd just about make it.</p>
+                <p style="margin:0 0 10px;">But you also have <strong>goals</strong> (child education, car, etc.) that need their own dedicated SIP every month. These reduce how much actually goes towards retirement.</p>
+                <p style="margin:0 0 10px;padding:10px 12px;background:#fff5f5;border-left:3px solid #c0392b;border-radius:6px;">
+                  <strong>Total SIP needed:</strong> Retirement + all goals = <strong>₹${Math.round(grandTotal).toLocaleString('en-IN')}/mo</strong><br>
+                  <strong>Your entered SIP:</strong> <strong>₹${totalMonthlySIP.toLocaleString('en-IN')}/mo</strong><br>
+                  <strong>Gap:</strong> ₹${Math.round(-gapSign).toLocaleString('en-IN')}/mo
+                </p>
+                <p style="margin:0;color:#888;font-size:12px;">👉 Either increase your monthly SIP, or reduce goal targets to close this gap.</p>
+              </div>
+            </div>
+          </div>
         </div>
       </div>`;
   }
